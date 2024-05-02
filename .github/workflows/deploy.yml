@@ -29,7 +29,9 @@ jobs:
           spring.datasource.url: ${{ secrets.DATASOURCE_URL }}
           spring.datasource.username: ${{ secrets.DATASOURCE_USERNAME }}
           spring.datasource.password: ${{ secrets.DATASOURCE_PASSWORD }}
-          jwt.secret: ${{ secrets.JWT_SECRET }}
+          spring.data.redis.host: ${{EC2_HOST}}
+          spring.data.redis.port: ${{REDIS_PORT}}
+        jwt.secret: ${{ secrets.JWT_SECRET }}
 
       - name: build with gradle
         run: |
