@@ -8,8 +8,6 @@ import funfit.pt.schedule.dto.AddScheduleRequest;
 import funfit.pt.schedule.dto.AddScheduleResponse;
 import funfit.pt.schedule.entity.Schedule;
 import funfit.pt.schedule.repository.ScheduleRepository;
-import funfit.pt.user.entity.User;
-import funfit.pt.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,29 +21,20 @@ public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final RelationshipRepository relationshipRepository;
-    private final JwtUtils jwtUtils;
 
     public AddScheduleResponse addSchedule(AddScheduleRequest addScheduleRequest, long relationshipId, HttpServletRequest request) {
         Relationship relationship = relationshipRepository.findById(relationshipId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
 
-        validateAuthority(relationship, request);
-        validateDuplicate(addScheduleRequest.getDate(), relationship.getTrainer());
+        validateDuplicate(addScheduleRequest.getDate(), relationship.getTrainerUserId());
 
         Schedule schedule = Schedule.create(relationship, addScheduleRequest.getDate(), addScheduleRequest.getMemo());
         scheduleRepository.save(schedule);
         return new AddScheduleResponse(schedule.getDate(), schedule.getMemo());
     }
 
-    private void validateAuthority(Relationship relationship, HttpServletRequest request) {
-        String email = jwtUtils.getEmailFromHeader(request);
-        if (!relationship.getMember().getEmail().equals(email) && !relationship.getTrainer().getEmail().equals(email)) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED);
-        }
-    }
-
-    private void validateDuplicate(LocalDateTime date, User trainer) {
-        List<Schedule> schedules = scheduleRepository.findByTrainer(trainer);
+    private void validateDuplicate(LocalDateTime date, long trainerUserId) {
+        List<Schedule> schedules = scheduleRepository.findByTrainerUserId(trainerUserId);
         boolean isAlreadyExist = schedules.stream()
                 .anyMatch(schedule -> schedule.getDate().equals(date));
         if (isAlreadyExist) {
