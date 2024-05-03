@@ -19,7 +19,7 @@ public class RelationshipController {
     private final RelationshipService relationshipService;
 
     @PostMapping("/api/relationship/add")
-    public ResponseEntity addTrainer(@RequestBody AddTrainerRequest addTrainerRequest, HttpServletRequest request) throws Exception {
+    public ResponseEntity addTrainer(@RequestBody AddTrainerRequest addTrainerRequest, HttpServletRequest request) {
         AddTrainerResponse addTrainerResponse = relationshipService.addTrainer(addTrainerRequest, request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("트레이너 추가 성공", addTrainerResponse));

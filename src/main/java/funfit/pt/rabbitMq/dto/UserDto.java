@@ -2,7 +2,7 @@ package funfit.pt.rabbitMq.dto;
 
 import lombok.*;
 
-@Getter
+@Getter @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

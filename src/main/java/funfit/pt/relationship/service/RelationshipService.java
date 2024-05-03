@@ -24,7 +24,7 @@ public class RelationshipService {
     private final JwtUtils jwtUtils;
     private final UserService userService;
 
-    public AddTrainerResponse addTrainer(AddTrainerRequest addTrainerRequest, HttpServletRequest request) throws Exception {
+    public AddTrainerResponse addTrainer(AddTrainerRequest addTrainerRequest, HttpServletRequest request) {
 
         String email = jwtUtils.getEmailFromHeader(request);
         UserDto member = userService.getUserDto(email);

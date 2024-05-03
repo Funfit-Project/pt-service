@@ -1,7 +1,5 @@
 package funfit.pt.rabbitMq;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import funfit.pt.exception.ErrorCode;
 import funfit.pt.exception.customException.BusinessException;
 import funfit.pt.rabbitMq.dto.ResponseValidateTrainerCode;
@@ -10,12 +8,11 @@ import funfit.pt.rabbitMq.dto.UserDto;
 import funfit.pt.rabbitMq.dto.RequestUserByEmail;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.LinkedHashMap;
 
 @Slf4j
 @Service
@@ -24,42 +21,51 @@ public class RabbitMqService {
 
     private final RabbitTemplate rabbitTemplate;
     private final RedisTemplate redisTemplate;
-    private final ObjectMapper mapper;
 
-    public UserDto requestUserByEmail(RequestUserByEmail dto) throws JsonProcessingException {
-        String messageBody = mapper.writeValueAsString(dto);
+    public UserDto requestUserByEmail(RequestUserByEmail dto) {
+        Object message = rabbitTemplate.convertSendAndReceive("request_user_by_email", dto);
+        log.info("response message = {}", message.toString());
 
-        MessageProperties properties = new MessageProperties();
-        properties.setContentType("application/json");
-        properties.setCorrelationId(dto.getEmail());
-
-        Message message = new Message(messageBody.getBytes(), properties);
-        Message response = rabbitTemplate.sendAndReceive("request_user_by_email", message);
-
-        UserDto userDto = mapper.readValue(new String(response.getBody()), UserDto.class);
-        log.info("RabbitMQ | 사용자 정보 획득, userDto = {}", userDto.toString());
+        UserDto userDto = convertMessageToUserDto(message);
         redisTemplate.opsForValue().set(userDto.getEmail(), userDto);
         log.info("Redis | 사용자 정보 캐시 저장 완료");
         return userDto;
     }
 
-    public ResponseValidateTrainerCode requestValidateTrainerCode(RequestValidateTrainerCode dto) throws JsonProcessingException {
-        String messageBody = mapper.writeValueAsString(dto);
-        MessageProperties properties = new MessageProperties();
-        properties.setContentType("application/json");
-        properties.setCorrelationId(dto.getTrainerCode());
+    private UserDto convertMessageToUserDto(Object response) {
+        LinkedHashMap map = (LinkedHashMap) response;
+        UserDto dto = new UserDto();
 
-        Message message = new Message(messageBody.getBytes(), properties);
-        Message response = rabbitTemplate.sendAndReceive("request_validate_trainer_code", message);
+        dto.setUserId((Integer)map.get("userId"));
+        dto.setEmail((String)map.get("email"));
+        dto.setPassword((String)map.get("password"));
+        dto.setUserName((String)map.get("userName"));
+        dto.setRoleName((String)map.get("roleName"));
+        dto.setPhoneNumber((String)map.get("phoneNumber"));
+        dto.setUserCode((String)map.get("userCode"));
+        return dto;
+    }
 
-        ResponseValidateTrainerCode responseDto = mapper.readValue(new String(response.getBody()), ResponseValidateTrainerCode.class);
-        redisTemplate.opsForValue().set(responseDto.getTrainerCode(), responseDto);
+    public ResponseValidateTrainerCode requestValidateTrainerCode(RequestValidateTrainerCode dto) {
+        Object message = rabbitTemplate.convertSendAndReceive("request_validate_trainer_code", dto);
+        log.info("response message = {}", message.toString());
 
-        System.out.println(responseDto.getResult());
-        if (!responseDto.getResult()) {
+        ResponseValidateTrainerCode validateTrainerCodeDto = convertMessageToValidateTrainerCodeDto(message);
+        if (!validateTrainerCodeDto.getResult()) {
             throw new BusinessException(ErrorCode.INVALID_USER_CODE);
         }
 
-        return responseDto;
+        return validateTrainerCodeDto;
+    }
+
+    private ResponseValidateTrainerCode convertMessageToValidateTrainerCodeDto(Object response) {
+        LinkedHashMap map = (LinkedHashMap) response;
+        ResponseValidateTrainerCode dto = new ResponseValidateTrainerCode();
+
+        dto.setResult((boolean)map.get("result"));
+        dto.setTrainerUserId((Integer)map.get("trainerUserId"));
+        dto.setUserName((String)map.get("userName"));
+        dto.setTrainerCode((String)map.get("trainerCode"));
+        return dto;
     }
 }
