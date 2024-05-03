@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 public class RequestValidateTrainerCode {
 
     private String trainerCode;
-    private String responseQueue;
 }

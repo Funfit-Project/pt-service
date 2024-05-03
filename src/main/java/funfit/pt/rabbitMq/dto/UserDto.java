@@ -6,7 +6,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponseUser {
+public class UserDto {
 
     private long userId;
     private String email;
