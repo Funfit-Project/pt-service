@@ -1,6 +1,6 @@
 package funfit.pt.relationship.entity;
 
-import funfit.pt.BaseEntity;
+import funfit.pt.responseDto.dto.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 

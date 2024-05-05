@@ -3,7 +3,7 @@ package funfit.pt.relationship.controller;
 import funfit.pt.relationship.dto.AddTrainerRequest;
 import funfit.pt.relationship.dto.AddTrainerResponse;
 import funfit.pt.relationship.service.RelationshipService;
-import funfit.pt.responseDto.SuccessResponse;
+import funfit.pt.responseDto.dto.SuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

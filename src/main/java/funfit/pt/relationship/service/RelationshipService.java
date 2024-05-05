@@ -1,6 +1,6 @@
 package funfit.pt.relationship.service;
 
-import funfit.pt.UserService;
+import funfit.pt.rabbitMq.service.UserService;
 import funfit.pt.rabbitMq.dto.ResponseValidateTrainerCode;
 import funfit.pt.rabbitMq.dto.UserDto;
 import funfit.pt.exception.ErrorCode;

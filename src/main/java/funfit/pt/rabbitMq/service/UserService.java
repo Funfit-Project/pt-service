@@ -1,9 +1,5 @@
-package funfit.pt;
+package funfit.pt.rabbitMq.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import funfit.pt.exception.ErrorCode;
-import funfit.pt.exception.customException.BusinessException;
-import funfit.pt.rabbitMq.RabbitMqService;
 import funfit.pt.rabbitMq.dto.RequestUserByEmail;
 import funfit.pt.rabbitMq.dto.RequestValidateTrainerCode;
 import funfit.pt.rabbitMq.dto.ResponseValidateTrainerCode;
@@ -22,16 +18,18 @@ public class UserService {
     private final RabbitMqService rabbitMqService;
 
     public UserDto getUserDto(String email) {
-        // 캐시에 사용자가 있는지 확인 후, 없으면 MQ를 통해 받아온 후 저장
         UserDto user = (UserDto) redisTemplate.opsForValue().get(email);
-        if (user == null) {
-            rabbitMqService.requestUserByEmail(new RequestUserByEmail(email));
+        if (user != null) {
+            return user;
         }
         return rabbitMqService.requestUserByEmail(new RequestUserByEmail(email));
     }
 
     public ResponseValidateTrainerCode getTrainerDto(String userCode) {
-        //TODO 캐시에 있는지 확인 먼저 하기
+        ResponseValidateTrainerCode trainerCode = (ResponseValidateTrainerCode) redisTemplate.opsForValue().get(userCode);
+        if (trainerCode != null) {
+            return trainerCode;
+        }
         return rabbitMqService.requestValidateTrainerCode(new RequestValidateTrainerCode(userCode));
     }
 }

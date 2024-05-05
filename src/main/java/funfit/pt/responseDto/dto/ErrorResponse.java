@@ -1,4 +1,4 @@
-package funfit.pt.responseDto;
+package funfit.pt.responseDto.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

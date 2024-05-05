@@ -1,6 +1,6 @@
 package funfit.pt.schedule.controller;
 
-import funfit.pt.responseDto.SuccessResponse;
+import funfit.pt.responseDto.dto.SuccessResponse;
 import funfit.pt.schedule.dto.AddScheduleRequest;
 import funfit.pt.schedule.dto.AddScheduleResponse;
 import funfit.pt.schedule.service.ScheduleService;

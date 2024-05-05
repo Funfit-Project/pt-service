@@ -1,4 +1,4 @@
-package funfit.pt.rabbitMq;
+package funfit.pt.rabbitMq.service;
 
 import funfit.pt.exception.ErrorCode;
 import funfit.pt.exception.customException.BusinessException;
@@ -54,6 +54,9 @@ public class RabbitMqService {
         if (!validateTrainerCodeDto.getResult()) {
             throw new BusinessException(ErrorCode.INVALID_USER_CODE);
         }
+
+        redisTemplate.opsForValue().set(validateTrainerCodeDto.getTrainerCode(), validateTrainerCodeDto);
+        log.info("Redis | 트레이너 코드 정보 캐시 저장 완료");
 
         return validateTrainerCodeDto;
     }
