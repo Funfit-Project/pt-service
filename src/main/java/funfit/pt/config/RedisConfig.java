@@ -1,5 +1,6 @@
 package funfit.pt.config;
 
+import funfit.pt.rabbitMq.dto.ResponseValidateTrainerCode;
 import funfit.pt.rabbitMq.dto.UserDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
@@ -28,11 +29,22 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, UserDto> redisTemplate() {
+    public RedisTemplate<String, UserDto> redisTemplateForUserDto() {
         RedisTemplate<String, UserDto> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(UserDto.class));
+        return redisTemplate;
+    }
+
+    @Bean
+    public RedisTemplate<String, ResponseValidateTrainerCode> redisTemplateForTrainerCode() {
+        RedisTemplate<String, ResponseValidateTrainerCode> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ResponseValidateTrainerCode.class));
         return redisTemplate;
     }
 }

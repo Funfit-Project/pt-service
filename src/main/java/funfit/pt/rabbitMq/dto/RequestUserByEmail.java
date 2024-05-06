@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestUserByEmail {
+public class RequestUserByEmail
+{
 
     private String email;
+    private String requestServiceName;
 }

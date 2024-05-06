@@ -6,30 +6,30 @@ import funfit.pt.rabbitMq.dto.ResponseValidateTrainerCode;
 import funfit.pt.rabbitMq.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, UserDto> redisTemplateForUserDto;
+    private final RedisTemplate<String, ResponseValidateTrainerCode> redisTemplate2;
     private final RabbitMqService rabbitMqService;
 
     public UserDto getUserDto(String email) {
-        UserDto user = (UserDto) redisTemplate.opsForValue().get(email);
-        if (user != null) {
-            return user;
+        UserDto userDto = redisTemplateForUserDto.opsForValue().get(email);
+        if (userDto != null) {
+            return userDto;
         }
-        return rabbitMqService.requestUserByEmail(new RequestUserByEmail(email));
+        return rabbitMqService.requestUserByEmail(new RequestUserByEmail(email, "pt"));
     }
 
     public ResponseValidateTrainerCode getTrainerDto(String userCode) {
-        ResponseValidateTrainerCode trainerCode = (ResponseValidateTrainerCode) redisTemplate.opsForValue().get(userCode);
-        if (trainerCode != null) {
-            return trainerCode;
-        }
         return rabbitMqService.requestValidateTrainerCode(new RequestValidateTrainerCode(userCode));
     }
 }

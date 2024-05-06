@@ -2,15 +2,16 @@ package funfit.pt.rabbitMq.dto;
 
 import lombok.*;
 
+import java.io.Serializable;
+
 @Getter @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class UserDto implements Serializable {
 
     private long userId;
     private String email;
-    private String password;
     private String userName;
     private String roleName;
     private String phoneNumber;
