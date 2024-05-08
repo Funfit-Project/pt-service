@@ -25,9 +25,7 @@ public class RelationshipService {
     private final UserService userService;
 
     public AddTrainerResponse addTrainer(AddTrainerRequest addTrainerRequest, HttpServletRequest request) {
-
-        String email = jwtUtils.getEmailFromHeader(request);
-        UserDto member = userService.getUserDto(email);
+        UserDto member = userService.getUserDto(jwtUtils.getEmailFromHeader(request));
         validateRole(member);
 
         ResponseValidateTrainerCode trainerDto = userService.getTrainerDto(addTrainerRequest.getUserCode());
@@ -41,7 +39,7 @@ public class RelationshipService {
     }
 
     private void validateRole(UserDto user) {
-        if (user.getRoleName().equals("TRAINER")) {
+        if (!user.getRoleName().equals("회원")) {
             throw new BusinessException(ErrorCode.REGISTER_ONLY_FOR_MEMBER);
         }
     }

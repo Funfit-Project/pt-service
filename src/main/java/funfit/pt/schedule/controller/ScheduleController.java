@@ -4,7 +4,6 @@ import funfit.pt.dto.SuccessResponse;
 import funfit.pt.schedule.dto.AddScheduleRequest;
 import funfit.pt.schedule.dto.AddScheduleResponse;
 import funfit.pt.schedule.service.ScheduleService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +20,8 @@ public class ScheduleController {
 
     @PostMapping("/api/{relationshipId}/add")
     public ResponseEntity addSchedule(@RequestBody AddScheduleRequest addScheduleRequest,
-                                      @PathVariable("relationshipId") long relationshipId,
-                                      HttpServletRequest request) {
-        AddScheduleResponse addScheduleResponse = scheduleService.addSchedule(addScheduleRequest, relationshipId, request);
+                                      @PathVariable("relationshipId") long relationshipId) {
+        AddScheduleResponse addScheduleResponse = scheduleService.addSchedule(addScheduleRequest, relationshipId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("수업 예약 성공", addScheduleResponse));
     }

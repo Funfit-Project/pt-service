@@ -6,7 +6,6 @@ import funfit.pt.rabbitMq.dto.ResponseValidateTrainerCode;
 import funfit.pt.rabbitMq.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final RedisTemplate<String, UserDto> redisTemplateForUserDto;
-    private final RedisTemplate<String, ResponseValidateTrainerCode> redisTemplate2;
     private final RabbitMqService rabbitMqService;
 
     public UserDto getUserDto(String email) {

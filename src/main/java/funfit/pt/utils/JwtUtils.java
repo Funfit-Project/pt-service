@@ -26,7 +26,13 @@ public class JwtUtils {
 
     public String getEmailFromHeader(HttpServletRequest request) {
         String jwt = getJwtFromHeader(request);
-        return jwtParser.parseClaimsJws(jwt).getBody().getSubject();
+        try {
+            return jwtParser.parseClaimsJws(jwt).getBody().getSubject();
+        } catch (ExpiredJwtException e) {
+            throw new CustomJwtException(ErrorCode.EXPIRED_JWT);
+        } catch (JwtException e) {
+            throw new CustomJwtException(ErrorCode.INVALID_JWT);
+        }
     }
 
     private String getJwtFromHeader(HttpServletRequest request) {

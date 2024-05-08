@@ -8,7 +8,6 @@ import funfit.pt.schedule.dto.AddScheduleRequest;
 import funfit.pt.schedule.dto.AddScheduleResponse;
 import funfit.pt.schedule.entity.Schedule;
 import funfit.pt.schedule.repository.ScheduleRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +21,9 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final RelationshipRepository relationshipRepository;
 
-    public AddScheduleResponse addSchedule(AddScheduleRequest addScheduleRequest, long relationshipId, HttpServletRequest request) {
+    public AddScheduleResponse addSchedule(AddScheduleRequest addScheduleRequest, long relationshipId) {
         Relationship relationship = relationshipRepository.findById(relationshipId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_RELATIONSHIP_ID));
 
         validateDuplicate(addScheduleRequest.getDate(), relationship.getTrainerUserId());
 
