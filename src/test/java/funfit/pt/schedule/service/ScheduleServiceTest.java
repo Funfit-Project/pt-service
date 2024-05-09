@@ -25,21 +25,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 class ScheduleServiceTest {
 
-    @Autowired
-    private ScheduleService scheduleService;
-
-    @Autowired
-    private ScheduleRepository scheduleRepository;
-
-    @Autowired
-    private RelationshipRepository relationshipRepository;
-
-    @Autowired
-    private EntityManager em;
+    @Autowired private ScheduleService scheduleService;
+    @Autowired private ScheduleRepository scheduleRepository;
+    @Autowired private RelationshipRepository relationshipRepository;
+    @Autowired private EntityManager em;
 
     @BeforeEach
     public void initRelationship() {
-        em.createNativeQuery("alter table relationship auto_increment = 1;")
+        em.createNativeQuery("alter table relationship alter column relationship_id restart with 1;")
                 .executeUpdate();
 
         Relationship relationship = Relationship.create(2, 1, "펀핏짐", 10);

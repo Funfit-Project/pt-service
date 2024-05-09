@@ -143,7 +143,6 @@ class RelationshipServiceTest {
 
         @Override
         public ResponseValidateTrainerCode getTrainerDto(String userCode) {
-            log.info("stub 실행!!!!!!");
             return new ResponseValidateTrainerCode(true, trainerUserId, "trainerName", "userCode");
         }
     }
