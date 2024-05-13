@@ -11,8 +11,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class CreateNewMemberSubDto implements Serializable {
 
-    private long memberId;
-    private long trainerId;
+    private String memberEmail;
+    private String trainerEmail;
     private String centerName;
     private int registrationCount;
 }

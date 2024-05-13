@@ -18,17 +18,12 @@ public class Schedule {
     private Relationship relationship;
 
     @Column(nullable = false)
-    private LocalDateTime date;
+    private LocalDateTime dateTime;
 
-    private String memo;
-
-    private String review;
-
-    public static Schedule create(Relationship relationship, LocalDateTime date, String memo) {
+    public static Schedule create(Relationship relationship, LocalDateTime dateTime) {
         Schedule schedule = new Schedule();
         schedule.relationship = relationship;
-        schedule.date = date;
-        schedule.memo = memo;
+        schedule.dateTime = dateTime;
         return schedule;
     }
 }

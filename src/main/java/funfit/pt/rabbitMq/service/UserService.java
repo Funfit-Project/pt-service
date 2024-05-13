@@ -1,9 +1,7 @@
 package funfit.pt.rabbitMq.service;
 
 import funfit.pt.rabbitMq.dto.RequestUserByEmail;
-import funfit.pt.rabbitMq.dto.RequestValidateTrainerCode;
-import funfit.pt.rabbitMq.dto.ResponseValidateTrainerCode;
-import funfit.pt.rabbitMq.dto.UserDto;
+import funfit.pt.rabbitMq.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,13 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final RedisTemplate<String, UserDto> redisTemplateForUserDto;
+    private final RedisTemplate<String, User> redisTemplateForUser;
     private final RabbitMqService rabbitMqService;
 
-    public UserDto getUserDto(String email) {
-        UserDto userDto = redisTemplateForUserDto.opsForValue().get(email);
-        if (userDto != null) {
-            return userDto;
+    public User getUser(String email) {
+        System.out.println("!!!!");
+        User user = redisTemplateForUser.opsForValue().get(email);
+        if (user != null) {
+            return user;
         }
         return rabbitMqService.requestUserByEmail(new RequestUserByEmail(email, "pt"));
     }

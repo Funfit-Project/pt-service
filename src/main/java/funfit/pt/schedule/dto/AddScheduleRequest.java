@@ -11,6 +11,5 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AddScheduleRequest {
 
-    private LocalDateTime date;
-    private String memo;
+    private LocalDateTime dateTime;
 }

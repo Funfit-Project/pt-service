@@ -2,10 +2,14 @@ package funfit.pt.schedule.service;
 
 import funfit.pt.exception.ErrorCode;
 import funfit.pt.exception.customException.BusinessException;
+import funfit.pt.rabbitMq.entity.Role;
+import funfit.pt.rabbitMq.entity.User;
+import funfit.pt.rabbitMq.service.UserService;
 import funfit.pt.relationship.entity.Relationship;
 import funfit.pt.relationship.repository.RelationshipRepository;
 import funfit.pt.schedule.dto.AddScheduleRequest;
 import funfit.pt.schedule.dto.AddScheduleResponse;
+import funfit.pt.schedule.dto.ReadScheduleResponse;
 import funfit.pt.schedule.entity.Schedule;
 import funfit.pt.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,22 +24,51 @@ public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final RelationshipRepository relationshipRepository;
+    private final UserService userService;
 
-    public AddScheduleResponse addSchedule(AddScheduleRequest addScheduleRequest, long relationshipId) {
-        Relationship relationship = relationshipRepository.findById(relationshipId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_RELATIONSHIP_ID));
+    public ReadScheduleResponse readSchedule(String userEmail) {
+        User user = userService.getUser(userEmail);
 
-        validateDuplicate(addScheduleRequest.getDate(), relationship.getTrainerId());
+        String trainerEmail = getTrainerEmail(user);
+        List<Schedule> schedules = scheduleRepository.findByTrainerEmail(trainerEmail);
 
-        Schedule schedule = Schedule.create(relationship, addScheduleRequest.getDate(), addScheduleRequest.getMemo());
-        scheduleRepository.save(schedule);
-        return new AddScheduleResponse(schedule.getDate(), schedule.getMemo());
+        List<ReadScheduleResponse.ScheduleDto> scheduleDtos = schedules
+                .stream()
+                .map(schedule -> {
+                    User member = userService.getUser(schedule.getRelationship().getMemberEmail());
+                    return new ReadScheduleResponse.ScheduleDto(schedule.getDateTime(), member.getUserName());
+                })
+                .toList();
+
+        return new ReadScheduleResponse(user.getRole().getName(), scheduleDtos);
     }
 
-    private void validateDuplicate(LocalDateTime date, long trainerUserId) {
-        List<Schedule> schedules = scheduleRepository.findByTrainerUserId(trainerUserId);
+    private String getTrainerEmail(User user) {
+        if (user.getRole() == Role.MEMBER) {
+            Relationship relationship = relationshipRepository.findByMemberEmail(user.getEmail())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+            return relationship.getTrainerEmail();
+        }
+        else {
+            return user.getEmail();
+        }
+    }
+
+    public AddScheduleResponse addSchedule(AddScheduleRequest addScheduleRequest, String memberEmail) {
+        Relationship relationship = relationshipRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+
+        validateDuplicate(relationship.getTrainerEmail(), addScheduleRequest.getDateTime());
+
+        Schedule schedule = Schedule.create(relationship, addScheduleRequest.getDateTime());
+        scheduleRepository.save(schedule);
+        return new AddScheduleResponse(schedule.getDateTime());
+    }
+
+    private void validateDuplicate(String trainerEmail, LocalDateTime dateTime) {
+        List<Schedule> schedules = scheduleRepository.findByTrainerEmail(trainerEmail);
         boolean isAlreadyExist = schedules.stream()
-                .anyMatch(schedule -> schedule.getDate().equals(date));
+                .anyMatch(schedule -> schedule.getDateTime().equals(dateTime));
         if (isAlreadyExist) {
             throw new BusinessException(ErrorCode.ALREADY_RESERVATION);
         }

@@ -13,15 +13,15 @@ public class RelationshipService {
 
     private final RelationshipRepository relationshipRepository;
 
-    public void createRelationship(long memberId, long trainerId, String centerName, int registrationCount) {
-        validateDuplicate(memberId, trainerId);
+    public void createRelationship(String memberEmail, String trainerEmail, String centerName, int registrationCount) {
+        validateDuplicate(memberEmail, trainerEmail);
 
-        Relationship relationship = Relationship.create(memberId, trainerId, centerName, registrationCount);
+        Relationship relationship = Relationship.create(memberEmail, trainerEmail, centerName, registrationCount);
         relationshipRepository.save(relationship);
     }
 
-    private void validateDuplicate(long memberId, long trainerId) {
-        if (relationshipRepository.findByMemberAndTrainer(memberId, trainerId).isPresent()) {
+    private void validateDuplicate(String memberEmail, String trainerEmail) {
+        if (relationshipRepository.findByMemberAndTrainerEmail(memberEmail, trainerEmail).isPresent()) {
             throw new BusinessException(ErrorCode.DUPLICATED_RELATIONSHIP);
         }
     }
