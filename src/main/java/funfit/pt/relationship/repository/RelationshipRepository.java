@@ -12,10 +12,10 @@ import java.util.Optional;
 public interface RelationshipRepository extends JpaRepository<Relationship, Long> {
 
     @Query("select r from Relationship r " +
-            "where r.memberUserId = :memberUserId " +
-            "and r.trainerUserId = :trainerUserId")
-    Optional<Relationship> findByMemberAndTrainer(@Param("memberUserId") long memberUserId,
-                                                  @Param("trainerUserId") long trainerUserId);
+            "where r.memberId = :memberId " +
+            "and r.trainerId = :trainerId")
+    Optional<Relationship> findByMemberAndTrainer(@Param("memberId") long memberId,
+                                                  @Param("trainerId") long trainerId);
 
 //    Slice<Relationship> findSliceByTrainer(User trainer, Pageable pageable);
 }

@@ -26,8 +26,4 @@ public class UserService {
         }
         return rabbitMqService.requestUserByEmail(new RequestUserByEmail(email, "pt"));
     }
-
-    public ResponseValidateTrainerCode getTrainerDto(String userCode) {
-        return rabbitMqService.requestValidateTrainerCode(new RequestValidateTrainerCode(userCode));
-    }
 }

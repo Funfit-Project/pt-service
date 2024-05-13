@@ -25,7 +25,7 @@ public class ScheduleService {
         Relationship relationship = relationshipRepository.findById(relationshipId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_RELATIONSHIP_ID));
 
-        validateDuplicate(addScheduleRequest.getDate(), relationship.getTrainerUserId());
+        validateDuplicate(addScheduleRequest.getDate(), relationship.getTrainerId());
 
         Schedule schedule = Schedule.create(relationship, addScheduleRequest.getDate(), addScheduleRequest.getMemo());
         scheduleRepository.save(schedule);

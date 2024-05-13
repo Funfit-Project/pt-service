@@ -20,9 +20,7 @@ public enum ErrorCode {
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "잘못된 패스워드입니다."),
 
     // relationship
-    REGISTER_ONLY_FOR_MEMBER(HttpStatus.BAD_REQUEST, "회원만 트레이너를 추가할 수 있습니다."),
-    INVALID_USER_CODE(HttpStatus.BAD_REQUEST, "잘못된 회원코드입니다."),
-    DUPLICATED_RELATIONSHIP(HttpStatus.BAD_REQUEST, "이미 등록된 트레이너입니다"),
+    DUPLICATED_RELATIONSHIP(HttpStatus.BAD_REQUEST, "이미 등록된 관계입니다."),
     INVALID_ROLE(HttpStatus.BAD_REQUEST, "잘못된 사용자 역할입니다."),
     NOT_FOUND_RELATIONSHIP_ID(HttpStatus.BAD_REQUEST, "해당 id에 대한 relationship을 찾을 수 없습니다."),
 

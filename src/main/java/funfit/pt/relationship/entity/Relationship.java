@@ -13,10 +13,10 @@ public class Relationship extends BaseEntity {
     private long id;
 
     @Column(nullable = false)
-    private long memberUserId;
+    private long memberId;
 
     @Column(nullable = false)
-    private long trainerUserId;
+    private long trainerId;
 
     @Column(nullable = false)
     private String centerName;
@@ -27,10 +27,10 @@ public class Relationship extends BaseEntity {
     @Column(nullable = false)
     private int remainingCount;
 
-    public static Relationship create(long memberUserId, long trainerUserId, String centerName, int registrationCount) {
+    public static Relationship create(long memberId, long trainerId, String centerName, int registrationCount) {
         Relationship relationship = new Relationship();
-        relationship.memberUserId = memberUserId;
-        relationship.trainerUserId = trainerUserId;
+        relationship.memberId = memberId;
+        relationship.trainerId = trainerId;
         relationship.centerName = centerName;
         relationship.registrationCount = registrationCount;
         relationship.remainingCount = registrationCount;

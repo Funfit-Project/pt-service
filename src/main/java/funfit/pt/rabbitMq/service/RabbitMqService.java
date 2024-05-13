@@ -1,11 +1,7 @@
 package funfit.pt.rabbitMq.service;
 
-import funfit.pt.exception.ErrorCode;
-import funfit.pt.exception.customException.BusinessException;
-import funfit.pt.rabbitMq.dto.ResponseValidateTrainerCode;
-import funfit.pt.rabbitMq.dto.RequestValidateTrainerCode;
-import funfit.pt.rabbitMq.dto.UserDto;
-import funfit.pt.rabbitMq.dto.RequestUserByEmail;
+import funfit.pt.rabbitMq.dto.*;
+import funfit.pt.relationship.service.RelationshipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -23,6 +19,7 @@ public class RabbitMqService {
 
     private final RabbitTemplate rabbitTemplate;
     private final RedisTemplate<String, UserDto> redisTemplate;
+    private final RelationshipService relationshipService;
 
     public UserDto requestUserByEmail(RequestUserByEmail dto) {
         log.info("RabbitMQ | publish message in request_user_by_email queue");
@@ -48,26 +45,10 @@ public class RabbitMqService {
         return dto;
     }
 
-    public ResponseValidateTrainerCode requestValidateTrainerCode(RequestValidateTrainerCode dto) {
-        Object message = rabbitTemplate.convertSendAndReceive("request_validate_trainer_code", dto);
-        log.info("response message = {}", message.toString());
-
-        ResponseValidateTrainerCode validateTrainerCodeDto = convertMessageToValidateTrainerCodeDto(message);
-        if (!validateTrainerCodeDto.getResult()) {
-            throw new BusinessException(ErrorCode.INVALID_USER_CODE);
-        }
-        return validateTrainerCodeDto;
-    }
-
-    private ResponseValidateTrainerCode convertMessageToValidateTrainerCodeDto(Object response) {
-        LinkedHashMap map = (LinkedHashMap) response;
-        ResponseValidateTrainerCode dto = new ResponseValidateTrainerCode();
-
-        dto.setResult((boolean)map.get("result"));
-        dto.setTrainerUserId((Integer)map.get("trainerUserId"));
-        dto.setUserName((String)map.get("userName"));
-        dto.setTrainerCode((String)map.get("trainerCode"));
-        return dto;
+    @RabbitListener(queues = "create_new_member")
+    public void createRelationship(CreateNewMemberSubDto dto) {
+        log.info("RabbitMQ | on message in create_new_member queue, message = {}", dto.toString());
+        relationshipService.createRelationship(dto.getMemberId(), dto.getTrainerId(), dto.getCenterName(), dto.getRegistrationCount());
     }
 
     @RabbitListener(queues = "edited_user_id_for_pt")
