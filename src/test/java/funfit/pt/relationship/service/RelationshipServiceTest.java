@@ -28,12 +28,12 @@ class RelationshipServiceTest {
     @DisplayName("relationship 생성 성공")
     void createRelationshipSuccess() {
         // given
-        long memberId = 1l;
-        long trainerId = 2l;
-        relationshipService.createRelationship(memberId, trainerId, "석세스짐", 10);
+        String memberEmail = "member@naver.com";
+        String trainerEmail = "trainer@naver.com";
+        relationshipService.createRelationship(memberEmail, trainerEmail, "석세스짐", 10);
 
         // then
-        Assertions.assertThat(relationshipRepository.findByMemberAndTrainer(memberId, trainerId))
+        Assertions.assertThat(relationshipRepository.findByMemberAndTrainerEmail(memberEmail, trainerEmail))
                 .isPresent();
     }
 
@@ -41,13 +41,13 @@ class RelationshipServiceTest {
     @DisplayName("relationship 생성 실패-이미 생성된 relationship")
     void createRelationshipFailByDuplicated() {
         // given
-        long memberId = 1l;
-        long trainerId = 2l;
-        relationshipRepository.save(Relationship.create(memberId, trainerId, "석세스짐", 10));
+        String memberEmail = "member@naver.com";
+        String trainerEmail = "trainer@naver.com";
+        relationshipRepository.save(Relationship.create(memberEmail, trainerEmail, "석세스짐", 10));
 
         // then
         Assertions.assertThat(assertThrows(BusinessException.class,
-                        () -> relationshipService.createRelationship(memberId, trainerId, "석세스짐", 10)).getErrorCode())
+                        () -> relationshipService.createRelationship(memberEmail, trainerEmail, "석세스짐", 10)).getErrorCode())
                 .isEqualTo(ErrorCode.DUPLICATED_RELATIONSHIP);
     }
 }
