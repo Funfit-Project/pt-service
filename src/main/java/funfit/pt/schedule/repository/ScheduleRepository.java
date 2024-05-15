@@ -1,12 +1,13 @@
 package funfit.pt.schedule.repository;
 
-import funfit.pt.relationship.entity.Relationship;
 import funfit.pt.schedule.entity.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
@@ -14,5 +15,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
             "where s.relationship.trainerEmail = :trainerEmail")
     List<Schedule> findByTrainerEmail(@Param("trainerEmail") String trainerEmail);
 
-    List<Schedule> findByRelationship(Relationship relationship);
+    Optional<Schedule> findByTrainerEmailAndDateTime(String trainerEmail, LocalDateTime dateTime);
 }

@@ -13,12 +13,17 @@ import funfit.pt.schedule.dto.ReadScheduleResponse;
 import funfit.pt.schedule.entity.Schedule;
 import funfit.pt.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ScheduleService {
 
@@ -48,8 +53,7 @@ public class ScheduleService {
             Relationship relationship = relationshipRepository.findByMemberEmail(user.getEmail())
                     .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
             return relationship.getTrainerEmail();
-        }
-        else {
+        } else {
             return user.getEmail();
         }
     }
@@ -58,18 +62,19 @@ public class ScheduleService {
         Relationship relationship = relationshipRepository.findByMemberEmail(memberEmail)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
 
-        validateDuplicate(relationship.getTrainerEmail(), addScheduleRequest.getDateTime());
-
-        Schedule schedule = Schedule.create(relationship, addScheduleRequest.getDateTime());
-        scheduleRepository.save(schedule);
-        return new AddScheduleResponse(schedule.getDateTime());
+        try {
+            validateDuplicate(relationship.getTrainerEmail(), addScheduleRequest.getDateTime());
+            Schedule schedule = Schedule.create(relationship, addScheduleRequest.getDateTime());
+            scheduleRepository.save(schedule);
+            return new AddScheduleResponse(schedule.getDateTime());
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+            throw new BusinessException(ErrorCode.ALREADY_RESERVATION);
+        }
     }
 
     private void validateDuplicate(String trainerEmail, LocalDateTime dateTime) {
-        List<Schedule> schedules = scheduleRepository.findByTrainerEmail(trainerEmail);
-        boolean isAlreadyExist = schedules.stream()
-                .anyMatch(schedule -> schedule.getDateTime().equals(dateTime));
-        if (isAlreadyExist) {
+        Optional<Schedule> optionalSchedule = scheduleRepository.findByTrainerEmailAndDateTime(trainerEmail, dateTime);
+        if (optionalSchedule.isPresent()) {
             throw new BusinessException(ErrorCode.ALREADY_RESERVATION);
         }
     }

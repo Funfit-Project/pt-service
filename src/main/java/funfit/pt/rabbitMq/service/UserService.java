@@ -18,7 +18,6 @@ public class UserService {
     private final RabbitMqService rabbitMqService;
 
     public User getUser(String email) {
-        System.out.println("!!!!");
         User user = redisTemplateForUser.opsForValue().get(email);
         if (user != null) {
             return user;
