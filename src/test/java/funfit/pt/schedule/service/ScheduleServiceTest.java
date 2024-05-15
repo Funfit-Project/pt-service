@@ -18,10 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -33,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @SpringBootTest
 @Transactional
-@Rollback(value = false)
 class ScheduleServiceTest {
 
     @Autowired private ScheduleRepository scheduleRepository;
@@ -79,15 +79,25 @@ class ScheduleServiceTest {
         // given
         Relationship relationship = Relationship.create("member@naver.com", "trainer@naver.com", "펀핏짐", 10);
         relationshipRepository.save(relationship);
-        scheduleRepository.save(Schedule.create(relationship, LocalDateTime.of(2024, 1, 1, 18, 00)));
-        scheduleRepository.save(Schedule.create(relationship, LocalDateTime.of(2024, 1, 1, 19, 00)));
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime dayOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        for (int i = 0; i < 7; i++) {
+            System.out.println("dayOfWeek = " + dayOfWeek);
+            scheduleRepository.save(Schedule.create(relationship, dayOfWeek));
+            dayOfWeek = dayOfWeek.plusDays(1);
+        }
 
         // when
         ReadScheduleResponse responseDto = scheduleService.readSchedule("member@naver.com");
 
         // then
+        responseDto.getReservedTimeList()
+                .stream()
+                .forEach(time -> System.out.println(time.getDateTime()));
         assertThat(responseDto.getReadUserRole()).isEqualTo(Role.MEMBER.getName());
-        assertThat(responseDto.getReservedTimeList().size()).isEqualTo(2);
+        assertThat(responseDto.getReservedTimeList().size()).isEqualTo(7);
+
     }
 
     @Test

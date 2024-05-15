@@ -11,9 +11,11 @@ import java.util.Optional;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
-    @Query("select s from Schedule s " +
-            "where s.relationship.trainerEmail = :trainerEmail")
-    List<Schedule> findByTrainerEmail(@Param("trainerEmail") String trainerEmail);
-
     Optional<Schedule> findByTrainerEmailAndDateTime(String trainerEmail, LocalDateTime dateTime);
+
+    @Query("select s from Schedule s " +
+            "where s.dateTime >= :startOfWeek and s.dateTime <= :endOfWeek")
+    List<Schedule> findByWeek(@Param("startOfWeek") LocalDateTime startOfWeek, @Param("endOfWeek") LocalDateTime endOfWeek);
+
+    List<Schedule> findByTrainerEmail(String trainerEmail);
 }

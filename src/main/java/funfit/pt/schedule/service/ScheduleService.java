@@ -2,7 +2,6 @@ package funfit.pt.schedule.service;
 
 import funfit.pt.exception.ErrorCode;
 import funfit.pt.exception.customException.BusinessException;
-import funfit.pt.rabbitMq.entity.Role;
 import funfit.pt.rabbitMq.entity.User;
 import funfit.pt.rabbitMq.service.UserService;
 import funfit.pt.relationship.entity.Relationship;
@@ -18,7 +17,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,8 +35,11 @@ public class ScheduleService {
     public ReadScheduleResponse readSchedule(String userEmail) {
         User user = userService.getUser(userEmail);
 
-        String trainerEmail = getTrainerEmail(user);
-        List<Schedule> schedules = scheduleRepository.findByTrainerEmail(trainerEmail);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime endOfWeek = now.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).withHour(23).withMinute(59).withSecond(59).withNano(59);
+
+        List<Schedule> schedules = scheduleRepository.findByWeek(startOfWeek, endOfWeek);
 
         List<ReadScheduleResponse.ScheduleDto> scheduleDtos = schedules
                 .stream()
@@ -46,16 +50,6 @@ public class ScheduleService {
                 .toList();
 
         return new ReadScheduleResponse(user.getRole().getName(), scheduleDtos);
-    }
-
-    private String getTrainerEmail(User user) {
-        if (user.getRole() == Role.MEMBER) {
-            Relationship relationship = relationshipRepository.findByMemberEmail(user.getEmail())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
-            return relationship.getTrainerEmail();
-        } else {
-            return user.getEmail();
-        }
     }
 
     public AddScheduleResponse addSchedule(AddScheduleRequest addScheduleRequest, String memberEmail) {
