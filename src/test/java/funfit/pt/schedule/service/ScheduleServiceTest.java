@@ -1,10 +1,8 @@
 package funfit.pt.schedule.service;
 
-import funfit.pt.exception.ErrorCode;
 import funfit.pt.exception.customException.BusinessException;
 import funfit.pt.rabbitMq.entity.Role;
 import funfit.pt.rabbitMq.entity.User;
-import funfit.pt.rabbitMq.service.RabbitMqService;
 import funfit.pt.rabbitMq.service.UserService;
 import funfit.pt.relationship.entity.Relationship;
 import funfit.pt.relationship.repository.RelationshipRepository;
@@ -13,49 +11,64 @@ import funfit.pt.schedule.dto.AddScheduleResponse;
 import funfit.pt.schedule.dto.ReadScheduleResponse;
 import funfit.pt.schedule.entity.Schedule;
 import funfit.pt.schedule.repository.ScheduleRepository;
-import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 @SpringBootTest
 @Transactional
+@Rollback(value = false)
 class ScheduleServiceTest {
 
     @Autowired private ScheduleRepository scheduleRepository;
     @Autowired private RelationshipRepository relationshipRepository;
-    @Autowired private EntityManager em;
-    private ScheduleService scheduleService;
+    @Autowired private ScheduleService scheduleService;
 
-    @BeforeEach
-    public void setup() {
-        scheduleService = new ScheduleService(scheduleRepository, relationshipRepository, new UserServiceStub(null, null));
+    @TestConfiguration
+    static class TestConfig {
+
+        @Autowired private ScheduleRepository scheduleRepository;
+        @Autowired private RelationshipRepository relationshipRepository;
+
+        @Bean
+        public ScheduleService scheduleService() {
+            return new ScheduleService(scheduleRepository, relationshipRepository, userServiceStub());
+        }
+
+        @Bean
+        public UserServiceStub userServiceStub() {
+            return new UserServiceStub();
+        }
     }
 
-    private class UserServiceStub extends UserService {
+    static class UserServiceStub extends UserService {
 
         Map<String, User> userStore = new HashMap<>();
 
-        public UserServiceStub(RedisTemplate<String, User> redisTemplateForUser, RabbitMqService rabbitMqService) {
-            super(redisTemplateForUser, rabbitMqService);
+        public UserServiceStub() {
+            super(null, null);
             userStore.put("member@naver.com", new User(1, "member@naver.com", "member", Role.MEMBER, "01011112222", null));
             userStore.put("trainer@naver.com", new User(2, "trainer@naver.com", "trainer", Role.TRAINER, "01011112222", "userCode"));
         }
 
         @Override
         public User getUser(String email) {
-            System.out.println("~~~");
             return userStore.get(email);
         }
     }
@@ -73,8 +86,8 @@ class ScheduleServiceTest {
         ReadScheduleResponse responseDto = scheduleService.readSchedule("member@naver.com");
 
         // then
-        org.assertj.core.api.Assertions.assertThat(responseDto.getReadUserRole()).isEqualTo(Role.MEMBER.getName());
-        org.assertj.core.api.Assertions.assertThat(responseDto.getReservedTimeList().size()).isEqualTo(2);
+        assertThat(responseDto.getReadUserRole()).isEqualTo(Role.MEMBER.getName());
+        assertThat(responseDto.getReservedTimeList().size()).isEqualTo(2);
     }
 
     @Test
@@ -95,21 +108,43 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("스케줄 추가 실패-이미 예약된 시간")
-    public void addScheduleTestFailByDuplicatedDate() {
+    @DisplayName("스케줄 추가 실패-이미 예약된 시간(동시성 제어)")
+    public void addScheduleTestFailByDuplicatedDate() throws InterruptedException {
         // given
-        Relationship relationship = Relationship.create("member@naver.com", "trainer@naver.com", "펀핏짐", 10);
-        relationshipRepository.save(relationship);
+        int numberOfThreads = 10;
+        CountDownLatch countDownLatch = new CountDownLatch(numberOfThreads);
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        LocalDateTime dateTime = LocalDateTime.of(2024, 1, 1, 18, 00);
+        String trainerEmail = "trainer@naver.com";
 
         // when
-        LocalDateTime dateTime = LocalDateTime.of(2024, 1, 1, 18, 00);
-        scheduleRepository.save(Schedule.create(relationship, dateTime));
+        for (int i = 0; i < numberOfThreads; i++) {
+            String memberEmail = "member" + i + "@naver.com";
+
+            executorService.execute(() -> {
+                // relationship 생성 및 저장
+                Relationship relationship = Relationship.create(memberEmail, trainerEmail, "펀핏짐", 10);
+                relationshipRepository.save(relationship);
+
+                // scheduleService.addSchedule() 호출
+                AddScheduleRequest requestDto = new AddScheduleRequest(dateTime);
+                try {
+                    scheduleService.addSchedule(requestDto, memberEmail);
+                } catch (BusinessException e) {
+                    log.info("catch BusinessException, message = {}", e.getErrorCode().getMessage());
+                }
+                countDownLatch.countDown();
+            });
+        }
+
+        countDownLatch.await();
 
         // then
-        AddScheduleRequest requestDto = new AddScheduleRequest(dateTime);
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            scheduleService.addSchedule(requestDto, "member@naver.com");
-        });
-        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ALREADY_RESERVATION);
+        int size = scheduleRepository.findByTrainerEmail(trainerEmail)
+                .stream()
+                .filter(schedule -> schedule.getDateTime().equals(dateTime))
+                .toList()
+                .size();
+        assertThat(size).isEqualTo(1);
     }
 }
