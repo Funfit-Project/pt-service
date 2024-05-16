@@ -35,7 +35,7 @@ public class DiaryService {
         validateUserInRelationship(relationship, email);
         validateCreatePostAuthority(category, relationship, email);
 
-        Post post = Post.create(email, createAndUpdatePostRequest.getContent(), category);
+        Post post = Post.create(relationship, email, createAndUpdatePostRequest.getContent(), category);
         if (createAndUpdatePostRequest.getImageUrls() != null && !createAndUpdatePostRequest.getImageUrls().isEmpty()) {
             createAndUpdatePostRequest.getImageUrls()
                     .stream()
@@ -118,6 +118,7 @@ public class DiaryService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_COMMENT));
         validateUpdateAndDeleteComment(comment, email);
+        comment.deleteFromPost();
         commentRepository.delete(comment);
     }
 

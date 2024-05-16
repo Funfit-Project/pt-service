@@ -1,5 +1,6 @@
 package funfit.pt.query;
 
+import funfit.pt.diary.dto.ReadPostInListResponse;
 import funfit.pt.diary.dto.ReadPostResponse;
 import funfit.pt.diary.entity.Post;
 import funfit.pt.diary.repository.PostRepository;
@@ -10,6 +11,8 @@ import funfit.pt.rabbitMq.service.UserService;
 import funfit.pt.relationship.entity.Relationship;
 import funfit.pt.relationship.repository.RelationshipRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +48,15 @@ public class DiaryQueryService {
                 .map(image -> image.getUrl())
                 .toList();
         return new ReadPostResponse(postUser.getUserName(), post.getContent(), post.getCategory().getName(), imageUrls, commentDtos);
+    }
+
+    public Slice<ReadPostInListResponse> readPostList(long relationshipId, Pageable pageable, String email) {
+        Relationship relationship = relationshipRepository.findById(relationshipId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_RELATIONSHIP_ID));
+        validateReadAuthority(relationship, email);
+
+        return postRepository.findByRelationship(relationship, pageable)
+                .map(post -> new ReadPostInListResponse(post.getId(), post.getImages().get(0).getUrl()));
     }
 
     private void validateReadAuthority(Relationship relationship, String email) {
