@@ -50,4 +50,14 @@ public class Post extends BaseEntity {
         this.getImages().add(image);
         image.setPost(this);
     }
+
+    public void updateContent(String newContent) {
+        this.content = newContent;
+    }
+
+    public void updateImages(List<Image> images) {
+        this.images.clear();
+        images.stream()
+                .forEach(image -> this.images.add(image));
+    }
 }

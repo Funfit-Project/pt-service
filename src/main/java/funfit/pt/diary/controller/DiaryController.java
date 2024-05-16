@@ -1,7 +1,7 @@
 package funfit.pt.diary.controller;
 
-import funfit.pt.diary.dto.CreatCommentRequest;
-import funfit.pt.diary.dto.CreatePostRequest;
+import funfit.pt.diary.dto.CreatAndUpdateCommentRequest;
+import funfit.pt.diary.dto.CreateAndUpdatePostRequest;
 import funfit.pt.diary.dto.ReadPostResponse;
 import funfit.pt.diary.service.DiaryService;
 import funfit.pt.dto.SuccessResponse;
@@ -25,21 +25,56 @@ public class DiaryController {
     @PostMapping("/pt/{relationshipId}")
     public ResponseEntity createPost(@PathVariable long relationshipId,
                                      @RequestParam("category") String category,
-                                     @Validated @RequestBody CreatePostRequest createPostRequest,
+                                     @Validated @RequestBody CreateAndUpdatePostRequest createAndUpdatePostRequest,
                                      HttpServletRequest request) {
-        long postId = diaryService.createPost(relationshipId, category, createPostRequest, jwtUtils.getEmailFromHeader(request));
+        long postId = diaryService.createPost(relationshipId, category, createAndUpdatePostRequest, jwtUtils.getEmailFromHeader(request));
         ReadPostResponse readPostResponse = diaryQueryService.readPost(relationshipId, postId, jwtUtils.getEmailFromHeader(request));
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("등록 성공", readPostResponse));
     }
 
+    @PutMapping("/pt/{relationshipId}/{postId}")
+    public ResponseEntity updatePost(@PathVariable long relationshipId, @PathVariable long postId,
+                                     @Validated @RequestBody CreateAndUpdatePostRequest createAndUpdatePostRequest,
+                                     HttpServletRequest request) {
+        long savedPostId = diaryService.updatePost(postId, createAndUpdatePostRequest, jwtUtils.getEmailFromHeader(request));
+        ReadPostResponse readPostResponse = diaryQueryService.readPost(relationshipId, savedPostId, jwtUtils.getEmailFromHeader(request));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("수정 성공", readPostResponse));
+    }
+
+    @DeleteMapping("/pt/{relationshipId}/{postId}")
+    public ResponseEntity deletePost(@PathVariable long relationshipId, @PathVariable long postId,
+                                     HttpServletRequest request) {
+        diaryService.deletePost(postId, jwtUtils.getEmailFromHeader(request));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("게시글 삭제 성공", null));
+    }
+
     @PostMapping("/pt/{relationshipId}/{postId}/comment")
     public ResponseEntity addComment(@PathVariable long relationshipId, @PathVariable long postId,
-                                     @Validated @RequestBody CreatCommentRequest creatCommentRequest, HttpServletRequest request) {
-        diaryService.addComment(relationshipId, postId, creatCommentRequest, jwtUtils.getEmailFromHeader(request));
+                                     @Validated @RequestBody CreatAndUpdateCommentRequest creatAndUpdateCommentRequest, HttpServletRequest request) {
+        diaryService.addComment(relationshipId, postId, creatAndUpdateCommentRequest, jwtUtils.getEmailFromHeader(request));
         ReadPostResponse readPostResponse = diaryQueryService.readPost(relationshipId, postId, jwtUtils.getEmailFromHeader(request));
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("댓글 등록 성공", readPostResponse));
+    }
+
+    @PutMapping("/pt/{relationshipId}/{postId}/comment/{commentId}")
+    public ResponseEntity updateComment(@PathVariable long relationshipId, @PathVariable long postId, @PathVariable long commentId,
+                                        @Validated @RequestBody CreatAndUpdateCommentRequest creatAndUpdateCommentRequest, HttpServletRequest request) {
+        diaryService.updateComment(commentId, creatAndUpdateCommentRequest, jwtUtils.getEmailFromHeader(request));
+        ReadPostResponse readPostResponse = diaryQueryService.readPost(relationshipId, postId, jwtUtils.getEmailFromHeader(request));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("댓글 수정 성공", readPostResponse));
+    }
+
+    @DeleteMapping("/pt/{relationshipId}/{postId}/comment/{commentId}")
+    public ResponseEntity deletePost(@PathVariable long relationshipId, @PathVariable long postId, @PathVariable long commentId,
+                                     HttpServletRequest request) {
+        diaryService.deleteComment(commentId, jwtUtils.getEmailFromHeader(request));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("댓글 삭제 성공", null));
     }
 
     @GetMapping("/pt/{relationshipId}/{postId}")

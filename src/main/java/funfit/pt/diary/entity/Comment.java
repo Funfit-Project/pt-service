@@ -32,4 +32,8 @@ public class Comment {
     public void setPost(Post post) {
         this.post = post;
     }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }
