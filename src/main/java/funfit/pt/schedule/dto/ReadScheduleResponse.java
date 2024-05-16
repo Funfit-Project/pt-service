@@ -8,11 +8,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class ReadScheduleResponse {
 
-    private String readUserRole;
+    private int trainersReservationCount;
     private List<ScheduleDto> reservedTimeList;
 
     @Getter
@@ -22,5 +22,6 @@ public class ReadScheduleResponse {
 
         private LocalDateTime dateTime;
         private String memberName;
+        private boolean isReadUsersReservation;
     }
 }

@@ -22,7 +22,7 @@ public class ScheduleController {
     @GetMapping("/pt/schedule")
     public ResponseEntity readSchedule(HttpServletRequest request) {
         String userEmail = jwtUtils.getEmailFromHeader(request);
-        ReadScheduleResponse readScheduleResponse = scheduleService.readSchedule(userEmail);
+        ReadScheduleResponse readScheduleResponse = scheduleService.readScheduleForMember(userEmail);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("스케줄 조회 성공", readScheduleResponse));
     }

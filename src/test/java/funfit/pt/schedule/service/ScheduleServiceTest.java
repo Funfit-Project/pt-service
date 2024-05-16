@@ -83,21 +83,20 @@ class ScheduleServiceTest {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime dayOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0);
         for (int i = 0; i < 7; i++) {
-            System.out.println("dayOfWeek = " + dayOfWeek);
             scheduleRepository.save(Schedule.create(relationship, dayOfWeek));
             dayOfWeek = dayOfWeek.plusDays(1);
         }
 
         // when
-        ReadScheduleResponse responseDto = scheduleService.readSchedule("member@naver.com");
+        ReadScheduleResponse responseDto = scheduleService.readScheduleForMember("member@naver.com");
 
         // then
-        responseDto.getReservedTimeList()
-                .stream()
-                .forEach(time -> System.out.println(time.getDateTime()));
-        assertThat(responseDto.getReadUserRole()).isEqualTo(Role.MEMBER.getName());
-        assertThat(responseDto.getReservedTimeList().size()).isEqualTo(7);
-
+        assertThat(responseDto.getTrainersReservationCount()).isEqualTo(7);
+        responseDto.getReservedTimeList().stream()
+                        .forEach(reservationTime -> {
+                            assertThat(reservationTime.isReadUsersReservation()).isTrue();
+                            assertThat(reservationTime.getMemberName()).isEqualTo("member");
+                        });
     }
 
     @Test

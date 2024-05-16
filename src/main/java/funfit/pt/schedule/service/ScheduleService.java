@@ -6,9 +6,7 @@ import funfit.pt.rabbitMq.entity.User;
 import funfit.pt.rabbitMq.service.UserService;
 import funfit.pt.relationship.entity.Relationship;
 import funfit.pt.relationship.repository.RelationshipRepository;
-import funfit.pt.schedule.dto.AddScheduleRequest;
-import funfit.pt.schedule.dto.AddScheduleResponse;
-import funfit.pt.schedule.dto.ReadScheduleResponse;
+import funfit.pt.schedule.dto.*;
 import funfit.pt.schedule.entity.Schedule;
 import funfit.pt.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +30,7 @@ public class ScheduleService {
     private final RelationshipRepository relationshipRepository;
     private final UserService userService;
 
-    public ReadScheduleResponse readSchedule(String userEmail) {
+    public ReadScheduleResponse readScheduleForMember(String userEmail) {
         User user = userService.getUser(userEmail);
 
         LocalDateTime now = LocalDateTime.now();
@@ -44,12 +42,11 @@ public class ScheduleService {
         List<ReadScheduleResponse.ScheduleDto> scheduleDtos = schedules
                 .stream()
                 .map(schedule -> {
-                    User member = userService.getUser(schedule.getRelationship().getMemberEmail());
-                    return new ReadScheduleResponse.ScheduleDto(schedule.getDateTime(), member.getUserName());
+                    User reservedMember = userService.getUser(schedule.getRelationship().getMemberEmail());
+                    return new ReadScheduleResponse.ScheduleDto(schedule.getDateTime(), reservedMember.getUserName(), reservedMember.equals(user));
                 })
                 .toList();
-
-        return new ReadScheduleResponse(user.getRole().getName(), scheduleDtos);
+        return new ReadScheduleResponse(scheduleDtos.size(), scheduleDtos);
     }
 
     public AddScheduleResponse addSchedule(AddScheduleRequest addScheduleRequest, String memberEmail) {
