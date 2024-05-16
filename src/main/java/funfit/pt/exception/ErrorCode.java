@@ -28,6 +28,8 @@ public enum ErrorCode {
     ALREADY_RESERVATION(HttpStatus.BAD_REQUEST, "이미 예약된 시간입니다."),
 
     // post
+    UNAUTHORIZED_CREATE_PT_LOG(HttpStatus.UNAUTHORIZED, "수업일지는 트레이너만 작성할 수 있습니다."),
+    UNAUTHORIZED_CREATE_DIARY(HttpStatus.UNAUTHORIZED, "다이어리는 회원만 작성할 수 있습니다."),
     INVALID_CATEGORY(HttpStatus.BAD_REQUEST, "잘못된 카테고리입니다."),
 
     // jwt

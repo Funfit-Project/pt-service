@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -124,7 +123,7 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("스케줄 추가 실패-이미 예약된 시간(동시성 제어)")
+    @DisplayName("스케줄 추가 성공(동시성 제어)")
     public void addScheduleTestFailByDuplicatedDate() throws InterruptedException {
         // given
         int numberOfThreads = 10;
