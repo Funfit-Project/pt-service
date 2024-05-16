@@ -22,9 +22,9 @@ public class DiaryController {
 
     @PostMapping("/pt/{relationshipId}")
     public ResponseEntity createPost(@PathVariable long relationshipId,
-                                      @RequestParam("category") String category,
-                                      @Validated @RequestBody CreatePostRequest createPostRequest,
-                                      HttpServletRequest request) {
+                                     @RequestParam("category") String category,
+                                     @Validated @RequestBody CreatePostRequest createPostRequest,
+                                     HttpServletRequest request) {
         ReadPostResponse readPostResponse = diaryService.createPost(relationshipId, category, createPostRequest, jwtUtils.getEmailFromHeader(request));
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("등록 성공", readPostResponse));
@@ -32,11 +32,18 @@ public class DiaryController {
 
     @PostMapping("/pt/{relationshipId}/{postId}/comment")
     public ResponseEntity addComment(@PathVariable long relationshipId,
-                                        @PathVariable long postId,
-                                        @Validated @RequestBody CreatCommentRequest creatCommentRequest,
-                                        HttpServletRequest request) {
+                                     @PathVariable long postId,
+                                     @Validated @RequestBody CreatCommentRequest creatCommentRequest,
+                                     HttpServletRequest request) {
         ReadPostResponse readPostResponse = diaryService.addComment(relationshipId, postId, creatCommentRequest, jwtUtils.getEmailFromHeader(request));
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("댓글 등록 성공", readPostResponse));
+    }
+
+    @GetMapping("/pt/{relationshipId}/{postId}")
+    public ResponseEntity readPost(@PathVariable long relationshipId, @PathVariable long postId, HttpServletRequest request) {
+        ReadPostResponse readPostResponse = diaryService.readPost(relationshipId, postId, jwtUtils.getEmailFromHeader(request));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("게시글 조회 성공", readPostResponse));
     }
 }

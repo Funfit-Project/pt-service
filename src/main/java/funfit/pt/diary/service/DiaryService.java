@@ -76,6 +76,10 @@ public class DiaryService {
     }
 
     public ReadPostResponse addComment(long relationshipId, long postId, CreatCommentRequest creatCommentRequest, String email) {
+        Relationship relationship = relationshipRepository.findById(relationshipId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_RELATIONSHIP_ID));
+        validateRelationshipAuthority(relationship, email);
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_POST));
 
@@ -94,5 +98,34 @@ public class DiaryService {
                 .map(image -> image.getUrl())
                 .toList();
         return new ReadPostResponse(postUser.getUserName(), post.getContent(), post.getCategory().getName(), imageUrls, commentDtos);
+    }
+
+    public ReadPostResponse readPost(long relationshipId, long postId, String email) {
+        Relationship relationship = relationshipRepository.findById(relationshipId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_RELATIONSHIP_ID));
+        validateRelationshipAuthority(relationship, email);
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_POST));
+
+        User postUser = userService.getUser(post.getWriterEmail());
+        List<ReadPostResponse.CommentDto> commentDtos = post.getComments()
+                .stream()
+                .map(comment -> {
+                    User commentUser = userService.getUser(comment.getWriterEmail());
+                    return new ReadPostResponse.CommentDto(commentUser.getUserName(), comment.getContent());
+                })
+                .toList();
+        List<String> imageUrls = post.getImages()
+                .stream()
+                .map(image -> image.getUrl())
+                .toList();
+        return new ReadPostResponse(postUser.getUserName(), post.getContent(), post.getCategory().getName(), imageUrls, commentDtos);
+    }
+
+    private void validateRelationshipAuthority(Relationship relationship, String email) {
+        if (!relationship.getMemberEmail().equals(email) && !relationship.getTrainerEmail().equals(email)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
     }
 }
