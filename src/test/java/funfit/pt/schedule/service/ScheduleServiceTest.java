@@ -1,15 +1,10 @@
 package funfit.pt.schedule.service;
 
 import funfit.pt.exception.customException.BusinessException;
-import funfit.pt.rabbitMq.entity.Role;
-import funfit.pt.rabbitMq.entity.User;
-import funfit.pt.rabbitMq.service.UserService;
 import funfit.pt.relationship.entity.Relationship;
 import funfit.pt.relationship.repository.RelationshipRepository;
 import funfit.pt.schedule.dto.AddAndDeleteScheduleRequest;
 import funfit.pt.schedule.dto.AddScheduleResponse;
-import funfit.pt.schedule.dto.ReadScheduleResponse;
-import funfit.pt.schedule.entity.Schedule;
 import funfit.pt.schedule.repository.ScheduleRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -17,15 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,67 +32,6 @@ class ScheduleServiceTest {
     private RelationshipRepository relationshipRepository;
     @Autowired
     private ScheduleService scheduleService;
-
-    @TestConfiguration
-    static class TestConfig {
-
-        @Autowired
-        private ScheduleRepository scheduleRepository;
-        @Autowired
-        private RelationshipRepository relationshipRepository;
-
-        @Bean
-        public ScheduleService scheduleService() {
-            return new ScheduleService(scheduleRepository, relationshipRepository, userServiceStub());
-        }
-
-        @Bean
-        public UserServiceStub userServiceStub() {
-            return new UserServiceStub();
-        }
-    }
-
-    static class UserServiceStub extends UserService {
-
-        Map<String, User> userStore = new HashMap<>();
-
-        public UserServiceStub() {
-            super(null, null);
-            userStore.put("member@naver.com", new User(1, "member@naver.com", "member", Role.MEMBER, "01011112222", null));
-            userStore.put("trainer@naver.com", new User(2, "trainer@naver.com", "trainer", Role.TRAINER, "01011112222", "userCode"));
-        }
-
-        @Override
-        public User getUser(String email) {
-            return userStore.get(email);
-        }
-    }
-
-    @Test
-    @DisplayName("스케줄 조회 성공")
-    public void readScheduleTestSuccess() {
-        // given
-        Relationship relationship = Relationship.create("member@naver.com", "trainer@naver.com", "펀핏짐", 10);
-        relationshipRepository.save(relationship);
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime dayOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0);
-        for (int i = 0; i < 7; i++) {
-            scheduleRepository.save(Schedule.create(relationship, dayOfWeek));
-            dayOfWeek = dayOfWeek.plusDays(1);
-        }
-
-        // when
-        ReadScheduleResponse responseDto = scheduleService.readScheduleForMember("member@naver.com");
-
-        // then
-        assertThat(responseDto.getTrainersReservationCount()).isEqualTo(7);
-        responseDto.getReservedTimeList().stream()
-                .forEach(reservationTime -> {
-                    assertThat(reservationTime.isReadUsersReservation()).isTrue();
-                    assertThat(reservationTime.getMemberName()).isEqualTo("member");
-                });
-    }
 
     @Test
     @DisplayName("스케줄 추가 성공")

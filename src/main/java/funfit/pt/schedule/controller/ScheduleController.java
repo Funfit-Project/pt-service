@@ -1,6 +1,7 @@
 package funfit.pt.schedule.controller;
 
 import funfit.pt.dto.SuccessResponse;
+import funfit.pt.query.ScheduleQueryService;
 import funfit.pt.schedule.dto.AddAndDeleteScheduleRequest;
 import funfit.pt.schedule.dto.AddScheduleResponse;
 import funfit.pt.schedule.dto.ReadScheduleResponse;
@@ -17,12 +18,13 @@ import org.springframework.web.bind.annotation.*;
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
+    private final ScheduleQueryService scheduleQueryService;
     private final JwtUtils jwtUtils;
 
     @GetMapping("/pt/schedule")
     public ResponseEntity readSchedule(HttpServletRequest request) {
         String userEmail = jwtUtils.getEmailFromHeader(request);
-        ReadScheduleResponse readScheduleResponse = scheduleService.readScheduleForMember(userEmail);
+        ReadScheduleResponse readScheduleResponse = scheduleQueryService.readSchedule(userEmail);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("스케줄 조회 성공", readScheduleResponse));
     }
