@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddScheduleRequest {
+public class AddAndDeleteScheduleRequest {
 
     private LocalDateTime dateTime;
 }

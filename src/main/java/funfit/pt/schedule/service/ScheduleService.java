@@ -49,13 +49,13 @@ public class ScheduleService {
         return new ReadScheduleResponse(scheduleDtos.size(), scheduleDtos);
     }
 
-    public AddScheduleResponse addSchedule(AddScheduleRequest addScheduleRequest, String memberEmail) {
+    public AddScheduleResponse addSchedule(AddAndDeleteScheduleRequest addAndDeleteScheduleRequest, String memberEmail) {
         Relationship relationship = relationshipRepository.findByMemberEmail(memberEmail)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
 
         try {
-            validateDuplicate(relationship.getTrainerEmail(), addScheduleRequest.getDateTime());
-            Schedule schedule = Schedule.create(relationship, addScheduleRequest.getDateTime());
+            validateDuplicate(relationship.getTrainerEmail(), addAndDeleteScheduleRequest.getDateTime());
+            Schedule schedule = Schedule.create(relationship, addAndDeleteScheduleRequest.getDateTime());
             scheduleRepository.save(schedule);
             return new AddScheduleResponse(schedule.getDateTime());
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
@@ -68,5 +68,15 @@ public class ScheduleService {
         if (optionalSchedule.isPresent()) {
             throw new BusinessException(ErrorCode.ALREADY_RESERVATION);
         }
+    }
+
+    public void deleteSchedule(AddAndDeleteScheduleRequest addAndDeleteScheduleRequest, String memberEmail) {
+        Relationship relationship = relationshipRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+
+        Schedule schedule = scheduleRepository.findByRelationshipAndDateTime(relationship, addAndDeleteScheduleRequest.getDateTime())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+
+        scheduleRepository.delete(schedule);
     }
 }

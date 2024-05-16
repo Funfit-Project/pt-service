@@ -1,7 +1,7 @@
 package funfit.pt.schedule.controller;
 
 import funfit.pt.dto.SuccessResponse;
-import funfit.pt.schedule.dto.AddScheduleRequest;
+import funfit.pt.schedule.dto.AddAndDeleteScheduleRequest;
 import funfit.pt.schedule.dto.AddScheduleResponse;
 import funfit.pt.schedule.dto.ReadScheduleResponse;
 import funfit.pt.schedule.service.ScheduleService;
@@ -28,10 +28,18 @@ public class ScheduleController {
     }
 
     @PostMapping("/pt/schedule")
-    public ResponseEntity addSchedule(@RequestBody AddScheduleRequest addScheduleRequest, HttpServletRequest request) {
+    public ResponseEntity addSchedule(@RequestBody AddAndDeleteScheduleRequest addAndDeleteScheduleRequest, HttpServletRequest request) {
         String userEmail = jwtUtils.getEmailFromHeader(request);
-        AddScheduleResponse addScheduleResponse = scheduleService.addSchedule(addScheduleRequest, userEmail);
+        AddScheduleResponse addScheduleResponse = scheduleService.addSchedule(addAndDeleteScheduleRequest, userEmail);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("수업 예약 성공", addScheduleResponse));
+    }
+
+    @DeleteMapping("/pt/schedule")
+    public ResponseEntity deleteSchedule(@RequestBody AddAndDeleteScheduleRequest addAndDeleteScheduleRequest, HttpServletRequest request) {
+        String userEmail = jwtUtils.getEmailFromHeader(request);
+        scheduleService.deleteSchedule(addAndDeleteScheduleRequest, userEmail);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("수업 취소 성공", null));
     }
 }

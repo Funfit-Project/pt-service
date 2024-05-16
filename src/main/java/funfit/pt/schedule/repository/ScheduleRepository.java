@@ -1,5 +1,6 @@
 package funfit.pt.schedule.repository;
 
+import funfit.pt.relationship.entity.Relationship;
 import funfit.pt.schedule.entity.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +19,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findByWeek(@Param("startOfWeek") LocalDateTime startOfWeek, @Param("endOfWeek") LocalDateTime endOfWeek);
 
     List<Schedule> findByTrainerEmail(String trainerEmail);
+
+    Optional<Schedule> findByRelationshipAndDateTime(Relationship relationship, LocalDateTime dateTime);
 }
