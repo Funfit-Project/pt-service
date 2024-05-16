@@ -4,15 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-public class CreateDiaryResponse {
+@AllArgsConstructor
+public class CreatCommentRequest {
 
-    private String writerEmail;
     private String content;
-    private String category;
-    private List<String> imageUrls;
 }
