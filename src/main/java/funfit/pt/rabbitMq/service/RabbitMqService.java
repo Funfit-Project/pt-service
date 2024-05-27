@@ -1,7 +1,8 @@
 package funfit.pt.rabbitMq.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import funfit.pt.exception.customException.RabbitMqException;
 import funfit.pt.rabbitMq.dto.*;
-import funfit.pt.rabbitMq.entity.Role;
 import funfit.pt.rabbitMq.entity.User;
 import funfit.pt.relationship.service.RelationshipService;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +13,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.LinkedHashMap;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,28 +21,22 @@ public class RabbitMqService {
     private final RabbitTemplate rabbitTemplate;
     private final RedisTemplate<String, User> redisTemplate;
     private final RelationshipService relationshipService;
+    private final ObjectMapper objectMapper;
 
     public User requestUserByEmail(RequestUserByEmail dto) {
-        log.info("RabbitMQ | publish message in request_user_by_email queue");
-        Object message = rabbitTemplate.convertSendAndReceive("request_user_by_email", dto);
-        log.info("RabbitMQ | response message = {}", message.toString());
-        User user = convertMessageToUserDto(message);
-        redisTemplate.opsForValue().set(user.getEmail(), user);
-        log.info("Redis | 사용자 정보 저장 완료");
-        return user;
-    }
+        MqResult response = objectMapper.convertValue(rabbitTemplate.convertSendAndReceive("request_user_by_email", dto), MqResult.class);
 
-    private User convertMessageToUserDto(Object response) {
-        LinkedHashMap map = (LinkedHashMap) response;
-        User user = new User();
+        log.info("response mqResult = {}", response.toString());
 
-        user.setUserId((Integer)map.get("userId"));
-        user.setEmail((String)map.get("email"));
-        user.setUserName((String)map.get("userName"));
-        user.setRole(Role.find((String) map.get("roleName")));
-        user.setPhoneNumber((String)map.get("phoneNumber"));
-        user.setUserCode((String)map.get("userCode"));
-        return user;
+        if (response.isSuccess()) {
+            User user = objectMapper.convertValue(response.getResult(), User.class);
+            redisTemplate.opsForValue().set(user.getEmail(), user);
+            log.info("Redis | 사용자 정보 캐시 저장 완료");
+            return user;
+        } else {
+            ErrorResponse errorResponse = (ErrorResponse) response.getResult();
+            throw new RabbitMqException(errorResponse.getMessage());
+        }
     }
 
     @RabbitListener(queues = "create_new_member")
