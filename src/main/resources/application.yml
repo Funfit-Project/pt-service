@@ -8,16 +8,17 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
   rabbitmq:
-    host: localhost
+    host: rabbitmq
     port: 5672
     username: guest
     password: guest
   data:
     redis:
-      host: ${EC2_HOST}
-      port: ${REDIS_PORT}
+      host: redis_pt
+      port: 6379
 logging:
   level:
     org:
