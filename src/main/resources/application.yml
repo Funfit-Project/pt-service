@@ -34,3 +34,5 @@ springdoc:
     disable-swagger-default-url: true
     display-request-duration: true
     operations-sorter: alph
+server:
+  port: 8081
