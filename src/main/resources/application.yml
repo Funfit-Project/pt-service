@@ -15,16 +15,15 @@ spring:
     port: 5672
     username: guest
     password: guest
-  data:
-    redis:
-      host: redis_pt
-      port: 6379
+
 logging:
   level:
     org:
       hibernate.SQL: debug
+
 jwt:
   secret: ${JWT_SECRET}
+
 springdoc:
   packages-to-scan: funfit.pt
   default-consumes-media-type: application/json;charset=UTF-8
@@ -34,5 +33,6 @@ springdoc:
     disable-swagger-default-url: true
     display-request-duration: true
     operations-sorter: alph
+
 server:
   port: 8081
