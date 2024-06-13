@@ -29,7 +29,7 @@ public class DiaryController {
     private final DiaryQueryService diaryQueryService;
     private final JwtUtils jwtUtils;
 
-    @PostMapping("/pt/{relationshipId}")
+    @PostMapping("/{relationshipId}")
     public ResponseEntity createPost(@PathVariable long relationshipId,
                                      @RequestParam("category") String category,
                                      @Validated @RequestBody CreateAndUpdatePostRequest createAndUpdatePostRequest,
@@ -40,7 +40,7 @@ public class DiaryController {
                 .body(new SuccessResponse("등록 성공", readPostResponse));
     }
 
-    @PutMapping("/pt/{relationshipId}/{postId}")
+    @PutMapping("/{relationshipId}/{postId}")
     public ResponseEntity updatePost(@PathVariable long relationshipId, @PathVariable long postId,
                                      @Validated @RequestBody CreateAndUpdatePostRequest createAndUpdatePostRequest,
                                      HttpServletRequest request) {
@@ -50,7 +50,7 @@ public class DiaryController {
                 .body(new SuccessResponse("수정 성공", readPostResponse));
     }
 
-    @DeleteMapping("/pt/{relationshipId}/{postId}")
+    @DeleteMapping("/{relationshipId}/{postId}")
     public ResponseEntity deletePost(@PathVariable long relationshipId, @PathVariable long postId,
                                      HttpServletRequest request) {
         diaryService.deletePost(postId, jwtUtils.getEmailFromHeader(request));
@@ -58,7 +58,7 @@ public class DiaryController {
                 .body(new SuccessResponse("게시글 삭제 성공", null));
     }
 
-    @PostMapping("/pt/{relationshipId}/{postId}/comment")
+    @PostMapping("/{relationshipId}/{postId}/comment")
     public ResponseEntity addComment(@PathVariable long relationshipId, @PathVariable long postId,
                                      @Validated @RequestBody CreatAndUpdateCommentRequest creatAndUpdateCommentRequest, HttpServletRequest request) {
         diaryService.addComment(relationshipId, postId, creatAndUpdateCommentRequest, jwtUtils.getEmailFromHeader(request));
@@ -67,7 +67,7 @@ public class DiaryController {
                 .body(new SuccessResponse("댓글 등록 성공", readPostResponse));
     }
 
-    @PutMapping("/pt/{relationshipId}/{postId}/comment/{commentId}")
+    @PutMapping("/{relationshipId}/{postId}/comment/{commentId}")
     public ResponseEntity updateComment(@PathVariable long relationshipId, @PathVariable long postId, @PathVariable long commentId,
                                         @Validated @RequestBody CreatAndUpdateCommentRequest creatAndUpdateCommentRequest, HttpServletRequest request) {
         diaryService.updateComment(commentId, creatAndUpdateCommentRequest, jwtUtils.getEmailFromHeader(request));
@@ -76,7 +76,7 @@ public class DiaryController {
                 .body(new SuccessResponse("댓글 수정 성공", readPostResponse));
     }
 
-    @DeleteMapping("/pt/{relationshipId}/{postId}/comment/{commentId}")
+    @DeleteMapping("/{relationshipId}/{postId}/comment/{commentId}")
     public ResponseEntity deletePost(@PathVariable long relationshipId, @PathVariable long postId, @PathVariable long commentId,
                                      HttpServletRequest request) {
         diaryService.deleteComment(commentId, jwtUtils.getEmailFromHeader(request));
@@ -84,14 +84,14 @@ public class DiaryController {
                 .body(new SuccessResponse("댓글 삭제 성공", null));
     }
 
-    @GetMapping("/pt/{relationshipId}/{postId}")
+    @GetMapping("/{relationshipId}/{postId}")
     public ResponseEntity readPost(@PathVariable long relationshipId, @PathVariable long postId, HttpServletRequest request) {
         ReadPostResponse readPostResponse = diaryQueryService.readPost(relationshipId, postId, jwtUtils.getEmailFromHeader(request));
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("게시글 단일 조회 성공", readPostResponse));
     }
 
-    @GetMapping("/pt/{relationshipId}/posts")
+    @GetMapping("/{relationshipId}/posts")
     public ResponseEntity readPostList(@PathVariable long relationshipId,
                                        @PageableDefault(size = 9, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
                                        HttpServletRequest request) {

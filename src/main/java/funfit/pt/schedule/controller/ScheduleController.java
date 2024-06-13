@@ -21,7 +21,7 @@ public class ScheduleController {
     private final ScheduleQueryService scheduleQueryService;
     private final JwtUtils jwtUtils;
 
-    @GetMapping("/pt/schedule")
+    @GetMapping("/schedule")
     public ResponseEntity readSchedule(HttpServletRequest request) {
         String userEmail = jwtUtils.getEmailFromHeader(request);
         ReadScheduleResponse readScheduleResponse = scheduleQueryService.readSchedule(userEmail);
@@ -29,7 +29,7 @@ public class ScheduleController {
                 .body(new SuccessResponse("스케줄 조회 성공", readScheduleResponse));
     }
 
-    @PostMapping("/pt/schedule")
+    @PostMapping("/schedule")
     public ResponseEntity addSchedule(@RequestBody AddAndDeleteScheduleRequest addAndDeleteScheduleRequest, HttpServletRequest request) {
         String userEmail = jwtUtils.getEmailFromHeader(request);
         AddScheduleResponse addScheduleResponse = scheduleService.addSchedule(addAndDeleteScheduleRequest, userEmail);
@@ -37,7 +37,7 @@ public class ScheduleController {
                 .body(new SuccessResponse("수업 예약 성공", addScheduleResponse));
     }
 
-    @DeleteMapping("/pt/schedule")
+    @DeleteMapping("/schedule")
     public ResponseEntity deleteSchedule(@RequestBody AddAndDeleteScheduleRequest addAndDeleteScheduleRequest, HttpServletRequest request) {
         String userEmail = jwtUtils.getEmailFromHeader(request);
         scheduleService.deleteSchedule(addAndDeleteScheduleRequest, userEmail);

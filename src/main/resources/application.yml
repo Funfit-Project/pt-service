@@ -1,4 +1,16 @@
+server:
+  port: 8082
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://eureka-discovery:8761/eureka
+
 spring:
+  application:
+    name: pt-service
   datasource:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USERNAME}
@@ -24,6 +36,16 @@ logging:
 jwt:
   secret: ${JWT_SECRET}
 
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 10
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10000
+  instances:
+    redis:
+      baseConfig: default
+
 springdoc:
   packages-to-scan: funfit.pt
   default-consumes-media-type: application/json;charset=UTF-8
@@ -33,6 +55,3 @@ springdoc:
     disable-swagger-default-url: true
     display-request-duration: true
     operations-sorter: alph
-
-server:
-  port: 8081
