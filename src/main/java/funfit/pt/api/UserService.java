@@ -24,11 +24,11 @@ public class UserService {
         if (user != null) {
             return user;
         }
-        return authServiceClient.getUser(email);
+        return authServiceClient.getUserByEmail(email);
     }
 
     private User fallback(String email, Throwable e) {
         log.error("레디스 장애로 인한 fallback 메소드 호출, {}", e.getMessage());
-        return authServiceClient.getUser(email);
+        return authServiceClient.getUserByEmail(email);
     }
 }
