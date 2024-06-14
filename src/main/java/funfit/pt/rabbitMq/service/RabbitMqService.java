@@ -29,7 +29,7 @@ public class RabbitMqService {
     }
 
     /**
-     * 회원 정보 변경 시 -> id를 통해 회원 정보 요청
+     * 회원 정보 변경 시 -> email을 통해 회원 정보 요청
      */
     @RabbitListener(queues = "edited_user_email_for_pt")
     public void onMessageInEditedUserEmail(String email) {
