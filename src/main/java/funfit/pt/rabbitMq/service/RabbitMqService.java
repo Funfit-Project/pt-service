@@ -1,14 +1,11 @@
 package funfit.pt.rabbitMq.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import funfit.pt.exception.customException.RabbitMqException;
 import funfit.pt.rabbitMq.dto.*;
-import funfit.pt.rabbitMq.entity.User;
+import funfit.pt.api.dto.User;
 import funfit.pt.relationship.service.RelationshipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -18,40 +15,8 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class RabbitMqService {
 
-    private final RabbitTemplate rabbitTemplate;
     private final RedisTemplate<String, User> redisTemplate;
     private final RelationshipService relationshipService;
-    private final ObjectMapper objectMapper;
-
-    public User requestUserByEmail(RequestUserByEmail dto) {
-        MqResult response = objectMapper.convertValue(rabbitTemplate.convertSendAndReceive("request_user_by_email", dto), MqResult.class);
-
-        log.info("response mqResult = {}", response.toString());
-
-        if (response.isSuccess()) {
-            User user = objectMapper.convertValue(response.getResult(), User.class);
-            redisTemplate.opsForValue().set(user.getEmail(), user);
-            log.info("Redis | 사용자 정보 캐시 저장 완료");
-            return user;
-        } else {
-            ErrorResponse errorResponse = (ErrorResponse) response.getResult();
-            throw new RabbitMqException(errorResponse.getMessage());
-        }
-    }
-
-    // 레디스 장애시
-    public User requestUserByEmailWithoutRedis(RequestUserByEmail dto) {
-        MqResult response = objectMapper.convertValue(rabbitTemplate.convertSendAndReceive("request_user_by_email", dto), MqResult.class);
-
-        log.info("response mqResult = {}", response.toString());
-
-        if (response.isSuccess()) {
-            return objectMapper.convertValue(response.getResult(), User.class);
-        } else {
-            ErrorResponse errorResponse = (ErrorResponse) response.getResult();
-            throw new RabbitMqException(errorResponse.getMessage());
-        }
-    }
 
     @RabbitListener(queues = "create_new_member")
     public void createRelationship(CreateNewMemberSubDto dto) {

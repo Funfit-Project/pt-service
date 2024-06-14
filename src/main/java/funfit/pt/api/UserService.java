@@ -1,8 +1,7 @@
-package funfit.pt.rabbitMq.service;
+package funfit.pt.api;
 
-import funfit.pt.rabbitMq.dto.MicroServiceName;
-import funfit.pt.rabbitMq.dto.RequestUserByEmail;
-import funfit.pt.rabbitMq.entity.User;
+import funfit.pt.api.AuthServiceClient;
+import funfit.pt.api.dto.User;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final RedisTemplate<String, User> redisTemplateForUser;
-    private final RabbitMqService rabbitMqService;
+    private final AuthServiceClient authServiceClient;
 
     @CircuitBreaker(name = "redis", fallbackMethod = "fallback")
     public User getUser(String email) {
@@ -25,11 +24,11 @@ public class UserService {
         if (user != null) {
             return user;
         }
-        return rabbitMqService.requestUserByEmail(new RequestUserByEmail(email, MicroServiceName.PT));
+        return authServiceClient.getUser(email);
     }
 
     private User fallback(String email, Throwable e) {
         log.error("레디스 장애로 인한 fallback 메소드 호출, {}", e.getMessage());
-        return rabbitMqService.requestUserByEmailWithoutRedis(new RequestUserByEmail(email, MicroServiceName.PT));
+        return authServiceClient.getUser(email);
     }
 }

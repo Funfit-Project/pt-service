@@ -1,7 +1,7 @@
 package funfit.pt.config;
 
 import funfit.pt.rabbitMq.dto.ResponseValidateTrainerCode;
-import funfit.pt.rabbitMq.entity.User;
+import funfit.pt.api.dto.User;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

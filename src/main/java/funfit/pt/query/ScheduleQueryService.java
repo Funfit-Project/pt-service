@@ -1,7 +1,7 @@
 package funfit.pt.query;
 
-import funfit.pt.rabbitMq.entity.User;
-import funfit.pt.rabbitMq.service.UserService;
+import funfit.pt.api.dto.User;
+import funfit.pt.api.UserService;
 import funfit.pt.schedule.dto.ReadScheduleResponse;
 import funfit.pt.schedule.entity.Schedule;
 import funfit.pt.schedule.repository.ScheduleRepository;

@@ -1,4 +1,4 @@
-package funfit.pt.rabbitMq.entity;
+package funfit.pt.api.dto;
 
 import funfit.pt.exception.ErrorCode;
 import funfit.pt.exception.customException.BusinessException;
