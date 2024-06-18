@@ -12,8 +12,8 @@ spring:
   application:
     name: pt-service
   datasource:
-    url: ${DATASOURCE_URL}
-    username: ${DATASOURCE_USERNAME}
+    url: jdbc:mysql://pt_mysql:3306/pt?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
     password: ${DATASOURCE_PASSWORD}
   jpa:
     hibernate:
@@ -27,6 +27,20 @@ spring:
     port: 5672
     username: guest
     password: guest
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 4
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10000
+  instances:
+    auth:
+      baseConfig: default
 
 logging:
   level:
@@ -35,16 +49,6 @@ logging:
 
 jwt:
   secret: ${JWT_SECRET}
-
-resilience4j.circuitbreaker:
-  configs:
-    default:
-      slidingWindowSize: 10
-      failureRateThreshold: 50
-      waitDurationInOpenState: 10000
-  instances:
-    redis:
-      baseConfig: default
 
 springdoc:
   packages-to-scan: funfit.pt

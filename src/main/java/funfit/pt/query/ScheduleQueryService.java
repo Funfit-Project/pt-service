@@ -1,7 +1,7 @@
 package funfit.pt.query;
 
 import funfit.pt.api.dto.User;
-import funfit.pt.api.UserService;
+import funfit.pt.api.UserDataProvider;
 import funfit.pt.schedule.dto.ReadScheduleResponse;
 import funfit.pt.schedule.entity.Schedule;
 import funfit.pt.schedule.repository.ScheduleRepository;
@@ -20,10 +20,10 @@ import java.util.List;
 public class ScheduleQueryService {
 
     private final ScheduleRepository scheduleRepository;
-    private final UserService userService;
+    private final UserDataProvider userDataProvider;
 
     public ReadScheduleResponse readSchedule(String userEmail) {
-        User user = userService.getUser(userEmail);
+        User user = userDataProvider.getUser(userEmail);
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0);
@@ -34,7 +34,7 @@ public class ScheduleQueryService {
         List<ReadScheduleResponse.ScheduleDto> scheduleDtos = schedules
                 .stream()
                 .map(schedule -> {
-                    User reservedMember = userService.getUser(schedule.getRelationship().getMemberEmail());
+                    User reservedMember = userDataProvider.getUser(schedule.getRelationship().getMemberEmail());
                     return new ReadScheduleResponse.ScheduleDto(schedule.getDateTime(), reservedMember.getUserName(), reservedMember.equals(user));
                 })
                 .toList();
