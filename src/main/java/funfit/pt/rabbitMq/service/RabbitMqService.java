@@ -7,7 +7,7 @@ import funfit.pt.relationship.service.RelationshipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RabbitMqService {
 
-    private final RedisTemplate<String, User> redisTemplate;
     private final RelationshipService relationshipService;
     private final AuthServiceClient authServiceClient;
+    private final CacheManager cacheManager;
 
     /**
      * 새로운 PT 회원 생성 시 -> Relationship 생성 후 DB 저장
@@ -35,6 +35,8 @@ public class RabbitMqService {
     public void onMessageInEditedUserEmail(String email) {
         log.info("RabbitMQ | on message, queue name = edited_user_email_for_pt queue, message = {}", email);
         User user = authServiceClient.getUserByEmail(email);
-        redisTemplate.opsForValue().set(user.getEmail(), user);
+
+        cacheManager.getCache("user").put(email, user);
+        log.info("로컬캐시 값 변경 = {}", user.toString());
     }
 }
