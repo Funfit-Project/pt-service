@@ -8,13 +8,11 @@ import funfit.pt.schedule.dto.*;
 import funfit.pt.schedule.entity.Schedule;
 import funfit.pt.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -27,19 +25,19 @@ public class ScheduleService {
     public AddScheduleResponse addSchedule(AddAndDeleteScheduleRequest addAndDeleteScheduleRequest, String memberEmail) {
         Relationship relationship = relationshipRepository.findByMemberEmail(memberEmail)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+
         try {
             validateDuplicate(relationship.getTrainerEmail(), addAndDeleteScheduleRequest.getDateTime());
             Schedule schedule = Schedule.create(relationship, addAndDeleteScheduleRequest.getDateTime());
             scheduleRepository.save(schedule);
             return new AddScheduleResponse(schedule.getDateTime());
-        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.ALREADY_RESERVATION);
         }
     }
 
     private void validateDuplicate(String trainerEmail, LocalDateTime dateTime) {
-        Optional<Schedule> optionalSchedule = scheduleRepository.findByTrainerEmailAndDateTime(trainerEmail, dateTime);
-        if (optionalSchedule.isPresent()) {
+        if (scheduleRepository.findByTrainerEmailAndDateTime(trainerEmail, dateTime).isPresent()) {
             throw new BusinessException(ErrorCode.ALREADY_RESERVATION);
         }
     }
