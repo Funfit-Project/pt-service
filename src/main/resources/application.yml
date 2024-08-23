@@ -12,7 +12,7 @@ eureka:
 
 spring:
   application:
-    name: community-service
+    name: pt-service
   datasource:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USERNAME}
