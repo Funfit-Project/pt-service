@@ -4,30 +4,22 @@ services:
     image: pt
     container_name: pt
     ports:
-      - "8082:8082"
+      - "8080:8080"
     depends_on:
       mysql:
         condition: service_healthy
-    networks:
-      - funfit
 
-  mysql:
-    image: mysql
-    container_name: pt_mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DATASOURCE_PASSWORD}
-      MYSQL_DATABASE: pt
-      MYSQL_PASSWORD: ${DATASOURCE_PASSWORD}
-    ports:
-      - "3307:3306"
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - funfit
-
-networks:
-  funfit:
-    external: true
+#  mysql:
+#    image: mysql
+#    container_name: community_mysql
+#    environment:
+#      MYSQL_ROOT_PASSWORD: ${DATASOURCE_PASSWORD}
+#      MYSQL_DATABASE: community
+#      MYSQL_PASSWORD: ${DATASOURCE_PASSWORD}
+#    ports:
+#      - "3307:3306"
+#    healthcheck:
+#      test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5

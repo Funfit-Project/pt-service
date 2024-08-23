@@ -1,19 +1,21 @@
 server:
-  port: 8082
+  port: 8080
 
 eureka:
+  instance:
+    prefer-ip-address: true
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://eureka-discovery:8761/eureka
+      defaultZone: ${DISCOVERY_URL}
 
 spring:
   application:
-    name: pt-service
+    name: community-service
   datasource:
-    url: jdbc:mysql://pt_mysql:3306/pt?useSSL=false&allowPublicKeyRetrieval=true
-    username: root
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
   jpa:
     hibernate:
@@ -64,4 +66,4 @@ springdoc:
 
 openapi:
   service:
-    url: http://gateway-service:8080
+    url: ${GATEWAY_URL}

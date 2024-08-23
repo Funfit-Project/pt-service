@@ -21,6 +21,7 @@ spring:
     port: 5672
     username: guest
     password: guest
+    exchange: funfit
   data:
     redis:
       host: localhost
@@ -30,4 +31,5 @@ logging:
     org:
       hibernate.SQL: debug
 jwt:
-  secret: ${JWT_SECRET}
+  secret: flwkegnwoirgnoaeringaleriknglakernglekrng
+
