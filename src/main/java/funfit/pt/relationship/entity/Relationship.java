@@ -1,6 +1,6 @@
 package funfit.pt.relationship.entity;
 
-import funfit.pt.BaseEntity;
+import funfit.pt.dto.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -13,10 +13,10 @@ public class Relationship extends BaseEntity {
     private long id;
 
     @Column(nullable = false)
-    private long memberUserId;
+    private String memberEmail;
 
     @Column(nullable = false)
-    private long trainerUserId;
+    private String trainerEmail;
 
     @Column(nullable = false)
     private String centerName;
@@ -27,10 +27,10 @@ public class Relationship extends BaseEntity {
     @Column(nullable = false)
     private int remainingCount;
 
-    public static Relationship create(long memberUserId, long trainerUserId, String centerName, int registrationCount) {
+    public static Relationship create(String memberEmail, String trainerEmail, String centerName, int registrationCount) {
         Relationship relationship = new Relationship();
-        relationship.memberUserId = memberUserId;
-        relationship.trainerUserId = trainerUserId;
+        relationship.memberEmail = memberEmail;
+        relationship.trainerEmail = trainerEmail;
         relationship.centerName = centerName;
         relationship.registrationCount = registrationCount;
         relationship.remainingCount = registrationCount;

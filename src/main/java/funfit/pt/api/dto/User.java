@@ -1,18 +1,17 @@
-package funfit.pt.rabbitMq.dto;
+package funfit.pt.api.dto;
 
 import lombok.*;
 
-@Getter
+@Getter @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponseUser {
+public class User {
 
     private long userId;
     private String email;
-    private String password;
     private String userName;
-    private String roleName;
+    private Role role;
     private String phoneNumber;
     private String userCode;
 }

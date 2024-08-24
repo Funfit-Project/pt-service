@@ -1,4 +1,4 @@
-package funfit.pt.rabbitMq.dto;
+package funfit.pt.diary.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestValidateTrainerCode {
+public class ReadPostInListResponse {
 
-    private String trainerCode;
-    private String responseQueue;
+    private long postId;
+    private String mainImageUrl;
 }

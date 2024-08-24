@@ -3,14 +3,21 @@ package funfit.pt.rabbitMq.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
+import java.io.Serializable;
+
+@Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseValidateTrainerCode {
+public class ResponseValidateTrainerCode implements Serializable {
 
-    private boolean isExistTrainerCode;
+    private boolean result;
     private long trainerUserId;
     private String userName;
     private String trainerCode;
+
+    public boolean getResult() {
+        return result;
+    }
 }

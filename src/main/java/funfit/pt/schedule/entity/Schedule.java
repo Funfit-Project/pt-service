@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"date_time", "trainer_email"})})
 public class Schedule {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,20 +16,20 @@ public class Schedule {
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "relationship_id")
     private Relationship relationship;
 
     @Column(nullable = false)
-    private LocalDateTime date;
+    private LocalDateTime dateTime;
 
-    private String memo;
+    @Column(nullable = false)
+    private String trainerEmail;
 
-    private String review;
-
-    public static Schedule create(Relationship relationship, LocalDateTime date, String memo) {
+    public static Schedule create(Relationship relationship, LocalDateTime dateTime) {
         Schedule schedule = new Schedule();
         schedule.relationship = relationship;
-        schedule.date = date;
-        schedule.memo = memo;
+        schedule.dateTime = dateTime;
+        schedule.trainerEmail = relationship.getTrainerEmail();
         return schedule;
     }
 }
