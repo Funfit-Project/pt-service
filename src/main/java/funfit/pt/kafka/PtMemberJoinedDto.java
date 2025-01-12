@@ -1,7 +1,8 @@
-package funfit.pt.rabbitMq.dto;
+package funfit.pt.kafka;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.io.Serializable;
@@ -9,7 +10,8 @@ import java.io.Serializable;
 @Getter
 @ToString
 @AllArgsConstructor
-public class CreateNewMemberSubDto implements Serializable {
+@NoArgsConstructor
+public class PtMemberJoinedDto implements Serializable {
 
     private String memberEmail;
     private String trainerEmail;

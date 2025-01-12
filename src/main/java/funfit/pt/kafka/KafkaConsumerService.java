@@ -1,0 +1,49 @@
+package funfit.pt.kafka;
+
+import funfit.pt.api.AuthServiceClient;
+import funfit.pt.api.dto.User;
+import funfit.pt.relationship.service.RelationshipService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class KafkaConsumerService {
+
+    private final RelationshipService relationshipService;
+    private final AuthServiceClient authServiceClient;
+    private final CacheManager cacheManager;
+
+    /**
+     * 회원 정보 변경 시 -> email을 통해 회원 정보 요청
+     */
+    @KafkaListener(
+            topics = "user-info-updated",
+            groupId = "pt-service-group",
+            containerFactory = "kafkaListenerContainerFactoryForString"
+    )
+    public void consumeUserInfoUpdated(String email) {
+        log.info("consume message, message = {}", email);
+        User user = authServiceClient.getUserByEmail(email);
+
+        cacheManager.getCache("user").put(email, user);
+        log.info("로컬캐시 값 변경 = {}", user.toString());
+    }
+
+    /**
+     * 새로운 PT 회원 생성 시 -> Relationship 생성 후 DB 저장
+     */
+    @KafkaListener(
+            topics = "pt-member-joined",
+            groupId = "pt-service-group",
+            containerFactory = "kafkaListenerContainerFactoryForDto"
+    )
+    public void consumePtMemberJoined(PtMemberJoinedDto dto) {
+        log.info("consume message, message = {}", dto);
+        relationshipService.createRelationship(dto.getMemberEmail(), dto.getTrainerEmail(), dto.getCenterName(), dto.getRegistrationCount());
+    }
+}
