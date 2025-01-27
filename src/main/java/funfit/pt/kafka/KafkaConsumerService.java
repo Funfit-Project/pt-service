@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -26,12 +27,12 @@ public class KafkaConsumerService {
             groupId = "pt-service-group",
             containerFactory = "kafkaListenerContainerFactoryForString"
     )
-    public void consumeUserInfoUpdated(String email) {
+    public void consumeUserInfoUpdated(String email, Acknowledgment acknowledgment) {
         log.info("consume message, message = {}", email);
         User user = authServiceClient.getUserByEmail(email);
-
         cacheManager.getCache("user").put(email, user);
         log.info("로컬캐시 값 변경 = {}", user.toString());
+        acknowledgment.acknowledge();
     }
 
     /**
@@ -42,8 +43,9 @@ public class KafkaConsumerService {
             groupId = "pt-service-group",
             containerFactory = "kafkaListenerContainerFactoryForDto"
     )
-    public void consumePtMemberJoined(PtMemberJoinedDto dto) {
+    public void consumePtMemberJoined(PtMemberJoinedDto dto, Acknowledgment acknowledgment) {
         log.info("consume message, message = {}", dto);
         relationshipService.createRelationship(dto.getMemberEmail(), dto.getTrainerEmail(), dto.getCenterName(), dto.getRegistrationCount());
+        acknowledgment.acknowledge();
     }
 }
