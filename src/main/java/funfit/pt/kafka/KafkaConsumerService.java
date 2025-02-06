@@ -2,6 +2,7 @@ package funfit.pt.kafka;
 
 import funfit.pt.api.AuthServiceClient;
 import funfit.pt.api.dto.User;
+import funfit.pt.kafka.dto.PtMemberJoinedDto;
 import funfit.pt.relationship.service.RelationshipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ public class KafkaConsumerService {
     private final RelationshipService relationshipService;
     private final AuthServiceClient authServiceClient;
     private final CacheManager cacheManager;
+    private final KafkaProducerService kafkaProducerService;
 
     /**
      * 회원 정보 변경 시 -> email을 통해 회원 정보 요청
@@ -28,10 +30,20 @@ public class KafkaConsumerService {
             containerFactory = "kafkaListenerContainerFactoryForString"
     )
     public void consumeUserInfoUpdated(String email, Acknowledgment acknowledgment) {
-        log.info("consume message, message = {}", email);
+        log.info("kafka consume user-info-updated, message = {}", email);
         User user = authServiceClient.getUserByEmail(email);
         cacheManager.getCache("user").put(email, user);
-        log.info("로컬캐시 값 변경 = {}", user.toString());
+        acknowledgment.acknowledge();
+    }
+
+    @KafkaListener(
+            topics = "user-info-updated.DLT",
+            groupId = "pt-service-group",
+            containerFactory = "kafkaListenerContainerFactoryForString"
+    )
+    public void consumeUserInfoUpdatedDLQ(String email, Acknowledgment acknowledgment) {
+        log.info("kafka consume user-info-updated.DLT, message = {}", email);
+        kafkaProducerService.publishUserInfoUpdated(email);
         acknowledgment.acknowledge();
     }
 
@@ -41,7 +53,7 @@ public class KafkaConsumerService {
     @KafkaListener(
             topics = "pt-member-joined",
             groupId = "pt-service-group",
-            containerFactory = "kafkaListenerContainerFactoryForDto"
+            containerFactory = "kafkaListenerContainerFactoryForCompensatePointsDto"
     )
     public void consumePtMemberJoined(PtMemberJoinedDto dto, Acknowledgment acknowledgment) {
         log.info("consume message, message = {}", dto);
