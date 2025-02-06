@@ -1,5 +1,6 @@
 package funfit.pt.schedule.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import funfit.pt.dto.SuccessResponse;
 import funfit.pt.query.ScheduleQueryService;
 import funfit.pt.schedule.dto.AddAndDeleteScheduleRequest;
@@ -30,7 +31,7 @@ public class ScheduleController {
     }
 
     @PostMapping("/schedule")
-    public ResponseEntity addSchedule(@RequestBody AddAndDeleteScheduleRequest addAndDeleteScheduleRequest, HttpServletRequest request) {
+    public ResponseEntity addSchedule(@RequestBody AddAndDeleteScheduleRequest addAndDeleteScheduleRequest, HttpServletRequest request) throws JsonProcessingException {
         String userEmail = jwtUtils.getEmailFromHeader(request);
         AddScheduleResponse addScheduleResponse = scheduleService.addSchedule(addAndDeleteScheduleRequest, userEmail);
         return ResponseEntity.status(HttpStatus.OK)

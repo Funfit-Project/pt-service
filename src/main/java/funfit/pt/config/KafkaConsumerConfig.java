@@ -1,5 +1,6 @@
 package funfit.pt.config;
 
+import funfit.pt.kafka.dto.CompensatePointsDto;
 import funfit.pt.kafka.dto.PtMemberJoinedDto;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -48,7 +49,7 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, PtMemberJoinedDto> consumerFactoryForDto() {
+    public ConsumerFactory<String, PtMemberJoinedDto> consumerFactoryForPtMemberJoinedDto() {
         Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         config.put(ConsumerConfig.GROUP_ID_CONFIG, "pt-service-group");
@@ -62,9 +63,31 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, PtMemberJoinedDto> kafkaListenerContainerFactoryForDto() {
+    public ConcurrentKafkaListenerContainerFactory<String, PtMemberJoinedDto> kafkaListenerContainerFactoryForPtMemberJoinedDto() {
         ConcurrentKafkaListenerContainerFactory<String, PtMemberJoinedDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactoryForDto());
+        factory.setConsumerFactory(consumerFactoryForPtMemberJoinedDto());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        return factory;
+    }
+
+    @Bean
+    public ConsumerFactory<String, CompensatePointsDto> consumerFactoryForCompensatePointsDto() {
+        Map<String, Object> config = new HashMap<>();
+        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "pt-service-group");
+        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+
+        JsonDeserializer<CompensatePointsDto> deserializer = new JsonDeserializer<>(CompensatePointsDto.class, false);
+        return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), deserializer);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, CompensatePointsDto> kafkaListenerContainerFactoryForCompensatePointsDto() {
+        ConcurrentKafkaListenerContainerFactory<String, CompensatePointsDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactoryForCompensatePointsDto());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         return factory;
     }

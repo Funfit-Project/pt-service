@@ -18,6 +18,13 @@ public class ExceptionController {
     }
 
     @ExceptionHandler
+    public ResponseEntity handleBusinessException(ExternalServiceException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity.status(errorCode.getHttpStatus())
+                .body(new ErrorResponse(errorCode.getMessage()));
+    }
+
+    @ExceptionHandler
     public ResponseEntity handleJwtException(CustomJwtException e) {
         ErrorCode errorCode = e.getErrorCode();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

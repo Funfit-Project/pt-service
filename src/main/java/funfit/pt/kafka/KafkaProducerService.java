@@ -14,9 +14,9 @@ public class KafkaProducerService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final KafkaTemplate<String, CompensatePointsDto> kafkaTemplateForCompensatePointsDto;
 
-    public void publishCompensatePoints(CompensatePointsDto dto) {
-        log.info("kafka publish compensate-points, message = {}", dto.toString());
-        kafkaTemplateForCompensatePointsDto.send("compensate-points", dto);
+    public void publishCompensatePoints(CompensatePointsDto compensatePointsDto) {
+        log.info("kafka publish compensate-points, message = {}", compensatePointsDto.toString());
+        kafkaTemplateForCompensatePointsDto.send("compensate-points", compensatePointsDto);
     }
 
     public void publishUserInfoUpdated(String email) {

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class ExternalServiceFailureException extends RuntimeException {
+public class ExternalServiceException extends RuntimeException {
 
     private final ErrorCode errorCode;
 }

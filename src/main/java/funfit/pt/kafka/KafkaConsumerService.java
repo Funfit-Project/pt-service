@@ -53,7 +53,7 @@ public class KafkaConsumerService {
     @KafkaListener(
             topics = "pt-member-joined",
             groupId = "pt-service-group",
-            containerFactory = "kafkaListenerContainerFactoryForCompensatePointsDto"
+            containerFactory = "kafkaListenerContainerFactoryForPtMemberJoinedDto"
     )
     public void consumePtMemberJoined(PtMemberJoinedDto dto, Acknowledgment acknowledgment) {
         log.info("consume message, message = {}", dto);

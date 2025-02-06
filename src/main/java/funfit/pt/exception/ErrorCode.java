@@ -10,6 +10,8 @@ public enum ErrorCode {
 
     // external service
     UNAVAILABLE_AUTH_SERVICE(HttpStatus.SERVICE_UNAVAILABLE, "현재 auth 서비스는 사용 불가입니다."),
+    INSUFFICIENT_POINT(HttpStatus.FORBIDDEN, "포인트가 부족하여 예약에 실패했습니다."),
+    RESERVATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "수업 예약에 실패했습니다. 다시 시도해주세요."),
 
     NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 데이터를 찾을 수 없습니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "접근 권한이 없습니다."),
